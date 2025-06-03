@@ -40,7 +40,8 @@ public class WebViewCreaClient extends WebViewClient{
                     }
                 }
                 if (head != null) {
-                    head.prepend("<script src='https://cdn.jsdelivr.net/npm/babel-standalone@6.26.0/babel.min.js'></script>\n<script src='https://cdn.jsdelivr.net/npm/regenerator-runtime@0.14.1/runtime.min.js' type='text/babel'></script>\n<script src='https://cdnjs.cloudflare.com/ajax/libs/core-js/3.41.0/minified.min.js' type='text/babel'></script>");
+                    String urlPrefix = "file:///android_asset/WebViewCrea";
+                    head.prepend("<script src='"+urlPrefix+"/babel.min.js'></script>\n<script src='"+urlPrefix+"/runtime.js' type='text/babel'></script>\n<script src='"+urlPrefix+"/core-js.min.js' type='text/babel'></script>\n<script src='"+urlPrefix+"/customEventPoly.js' type='text/babel'></script>\n<script src='"+urlPrefix+"/fetch.js' type='text/babel'></script>\n<script src='"+urlPrefix+"/url-polyfill.js' type='text/babel'></script>\n");
                 }
                 InputStream inputStream = new ByteArrayInputStream(content.html().getBytes("UTF-8"));
                 return new WebResourceResponse("text/html", "UTF-8", inputStream);
