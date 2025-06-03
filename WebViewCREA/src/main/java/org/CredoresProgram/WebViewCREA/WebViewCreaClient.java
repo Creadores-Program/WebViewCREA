@@ -2,6 +2,7 @@ package org.CredoresProgram.WebViewCREA.utils;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebViewClient;
+import android.webkit.WebView;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import okhttp3.OkHttpClient;
