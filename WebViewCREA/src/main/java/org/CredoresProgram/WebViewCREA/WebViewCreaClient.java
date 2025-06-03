@@ -13,8 +13,12 @@ import org.jsoup.nodes.Element;
 public class WebViewCreaClient extends WebViewClient{
     private OkHttpClient client = new OkHttpClient();
     @Override
-    public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request){
+    public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
         String url = request.getUrl().toString();
+        return shouldInterceptRequest(view, url);
+    }
+    @Override
+    public WebResourceResponse shouldInterceptRequest(WebView view, String url){
         String[] partes = url.split("/");
         if(url.toLowerCase().endsWith(".html") || !partes[partes.length - 1].contains(".")){
             Request request = new Request.Builder()
@@ -25,7 +29,7 @@ public class WebViewCreaClient extends WebViewClient{
             try {
                 response = client.newCall(request).execute();
                 if (!response.isSuccessful() || response.body() == null) {
-                    return super.shouldInterceptRequest(view, request);
+                    return super.shouldInterceptRequest(view, url);
                 }
                 Document content = Jsoup.parse(response.body().string());
                 Element head = content.head();
@@ -40,9 +44,9 @@ public class WebViewCreaClient extends WebViewClient{
                 InputStream inputStream = new ByteArrayInputStream(content.html().getBytes("UTF-8"));
                 return new WebResourceResponse("text/html", "UTF-8", inputStream);
             }catch(Exception e){
-                return super.shouldInterceptRequest(view, request);
+                return super.shouldInterceptRequest(view, url);
             }
         }
-        return super.shouldInterceptRequest(view, request);
+        return super.shouldInterceptRequest(view, url);
     }
 }

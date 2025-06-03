@@ -9,11 +9,11 @@ dependencies {
 
 android {
     namespace 'org.CreadoresProgram.WebViewCREA'
-    compileSdkVersion 20
+    compileSdkVersion 21
 
     defaultConfig {
         minSdkVersion 19
-        targetSdkVersion 20
+        targetSdkVersion 21
         versionCode 1
         versionName "1.0"
     }
