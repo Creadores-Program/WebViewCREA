@@ -17,6 +17,12 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: 8
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Perms Gradle
+        run: chmod 777 gradlew
       - name: Build library
         run: ./gradlew :WebViewCREA:assembleRelease
 
