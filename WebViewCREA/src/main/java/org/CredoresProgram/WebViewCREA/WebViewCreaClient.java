@@ -25,7 +25,7 @@ public class WebViewCreaClient extends WebViewClient{
             try {
               Document content;
               if(url.toLowerCase().startsWith("data:text/html,")){
-                  content = Jsoup.parse(url.replaceFirst("data:text/html,"));
+                  content = Jsoup.parse(url.replaceFirst("data:text/html,", ""));
               }else{
                 Request request = new Request.Builder()
                   .url(url)
