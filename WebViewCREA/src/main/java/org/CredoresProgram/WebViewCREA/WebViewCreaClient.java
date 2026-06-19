@@ -1,4 +1,4 @@
-package org.CredoresProgram.WebViewCREA.utils;
+package org.CredoresProgram.WebViewCREA;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebViewClient;
