@@ -1,1 +1,22 @@
-export default async function handler(req, res) {}
+import { setHeaders } from '../../utils/Utils.js';
+import { patchJs } from '../../patch/patchJs.js';
+export default async function handler(req, res) {
+  if(req.method != 'POST' && req.method != 'OPTIONS'){
+    res.status(405).json({ error: 'Method Not Allowed' });
+    return;
+  }
+  setHeaders(res);
+  if(req.method == 'OPTIONS'){
+    res.status(200).end();
+    return;
+  }
+  res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
+  try{
+    const data = req.body;
+    const codePatch = await patchJs(data);
+    res.status(200).send(codePatch);
+  }catch(err){
+    console.error(err);
+    res.status(200).send(req.body);
+  }
+}
