@@ -6,6 +6,15 @@
     "build": "next build",
     "start": "next start"
   },
+  "browserslist": [
+    "ie >= 8",
+    "firefox >= 3.5",
+    "chrome >= 3",
+    "safari >= 4",
+    "opera >= 10",
+    "ios >= 3.2",
+    "android >= 2.1"
+  ],
   "dependencies": {
     "cheerio": "^1.0.0",
     "@babel/core": "^7.25.2",
@@ -15,6 +24,6 @@
     "postcss": "^8.4.41",
     "postcss-preset-env": "^10.0.0",
     "whatwg-fetch": "^3.6.20"
-  }
+  },
   "devDependencies": {}
 }
