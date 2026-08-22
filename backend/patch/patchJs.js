@@ -1,7 +1,12 @@
 import babel from '@babel/core';
 
-export default async function patchJs(jscode){
+export default async function patchJs(jscode, mapImport = {}, config = {}){
+  const isInline = config.isInlineExpression ?? false;
   const result = await babel.transformAsync(jscode, {
+    parserOpts: {
+      allowReturnOutsideFunction: isInline,
+      allowSuperOutsideMethod: isInline
+    },
     presets: [
       [
         '@babel/preset-env',
@@ -11,6 +16,14 @@ export default async function patchJs(jscode){
           corejs: '3.38',
           modules: 'auto',
           forceAllTransforms: true
+        }
+      ]
+    ],
+    plugins: [
+      [
+        'module-resolver',
+        {
+          alias: mapImport.imports || {}
         }
       ]
     ],
