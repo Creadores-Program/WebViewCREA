@@ -23,6 +23,7 @@
     "esbuild": "^0.21.0",
     "autoprefixer": "^10.4.20",
     "core-js": "^3.38.1",
+    "core-js-bundle": "^3.38.0",
     "postcss": "^8.4.41",
     "postcss-preset-env": "^10.0.0",
     "whatwg-fetch": "^3.6.20",
