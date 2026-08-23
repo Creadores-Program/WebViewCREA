@@ -24,7 +24,6 @@
     "core-js": "^3.38.1",
     "postcss": "^8.4.41",
     "postcss-preset-env": "^10.0.0",
-    "postcss-pseudoelements": "^7.0.0",
     "whatwg-fetch": "^3.6.20",
     "next": "latest",
     "react": "latest",
