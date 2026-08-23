@@ -33,8 +33,8 @@ export default async function patchJs(jscode, mapImport = {}, config = {}){
     configFile: false,
     babelrc: false
   });
-  const virtualInputPlugin = {
-    name: 'virtual-entry',
+  const resolveCdnPlugin = {
+    name: 'resolve-cdn',
     setup(build) {
       build.onResolve({ filter: /^entry$/ }, args => ({
         path: args.path,
@@ -42,10 +42,25 @@ export default async function patchJs(jscode, mapImport = {}, config = {}){
       }));
 
       build.onLoad({ filter: /^entry$/, namespace: 'virtual' }, () => ({
-        contents: babelR.code,
-        loader: 'js',
-        resolveDir: process.cwd()
+        contents: babelResult.code,
+        loader: 'js'
       }));
+
+      build.onResolve({ filter: /^core-js\// }, args => ({
+        path: `https://esm.sh/${args.path}?pin=v135`,
+        namespace: 'http-url'
+      }));
+
+      build.onResolve({ filter: /^https?:\/\// }, args => ({
+        path: args.path,
+        namespace: 'http-url'
+      }));
+
+      build.onLoad({ filter: /.*/, namespace: 'http-url' }, async (args) => {
+        const res = await fetch(args.path);
+        const contents = await res.text();
+        return { contents, loader: 'js' };
+      });
     }
   };
   const bundled = await esbuild.build({
@@ -54,7 +69,7 @@ export default async function patchJs(jscode, mapImport = {}, config = {}){
     write: false,
     format: 'iife',
     target: ['es5'],
-    plugins: [virtualInputPlugin]
+    plugins: [resolveCdnPlugin]
   });
   return bundled.outputFiles[0].text;
 }
