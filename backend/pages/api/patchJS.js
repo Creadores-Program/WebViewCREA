@@ -1,5 +1,5 @@
-import { setHeaders } from '../../utils/Utils.js';
-import { patchJs } from '../../patch/patchJs.js';
+import setHeaders from '../../utils/Utils.js';
+import patchJs from '../../patch/patchJs.js';
 export default async function handler(req, res) {
   if(req.method != 'POST' && req.method != 'OPTIONS'){
     res.status(405).json({ error: 'Method Not Allowed' });
