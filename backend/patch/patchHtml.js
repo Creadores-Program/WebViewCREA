@@ -44,7 +44,7 @@ export default async function patchHtml(html) {
   });
   const coreJsScript = '<script src="https://cdnjs.cloudflare.com/ajax/libs/core-js/3.38.1/minified.js"></script>\n';
   if ($('head').length > 0) {
-    $('head').prepend(coreJsScript+loadPolyfills());
+    $('head').prepend(coreJsScript+(await loadPolyfills()));
   } else {
     $.root().prepend(coreJsScript);
   }
