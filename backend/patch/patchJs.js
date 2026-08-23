@@ -2,6 +2,7 @@ import babel from '@babel/core';
 import moduleResolver from 'babel-plugin-module-resolver';
 import presetEnv from '@babel/preset-env';
 import * as esbuild from 'esbuild';
+import path from 'path';
 
 export default async function patchJs(jscode, mapImport = {}, config = {}){
   const isInline = config.isInlineExpression ?? false;
@@ -33,8 +34,9 @@ export default async function patchJs(jscode, mapImport = {}, config = {}){
     configFile: false,
     babelrc: false
   });
-  const resolveCdnPlugin = {
-    name: 'resolve-cdn',
+
+  const virtualInputPlugin = {
+    name: 'virtual-entry-and-externals',
     setup(build) {
       build.onResolve({ filter: /^entry$/ }, args => ({
         path: args.path,
@@ -43,23 +45,21 @@ export default async function patchJs(jscode, mapImport = {}, config = {}){
 
       build.onLoad({ filter: /^entry$/, namespace: 'virtual' }, () => ({
         contents: babelR.code,
-        loader: 'js'
-      }));
-
-      build.onResolve({ filter: /^core-js\// }, args => ({
-        path: `https://esm.sh/${args.path}?pin=v135`,
-        namespace: 'http-url'
+        loader: 'js',
+        resolveDir: process.cwd()
       }));
 
       build.onResolve({ filter: /^https?:\/\// }, args => ({
         path: args.path,
-        namespace: 'http-url'
+        external: true
       }));
 
-      build.onLoad({ filter: /.*/, namespace: 'http-url' }, async (args) => {
-        const res = await fetch(args.path);
-        const contents = await res.text();
-        return { contents, loader: 'js' };
+      build.onResolve({ filter: /^(lodash|react)$/ }, args => {
+        const map = {
+          lodash: 'https://esm.sh/lodash-es',
+          react: 'https://esm.sh/react@18'
+        };
+        return { path: map[args.path], external: true };
       });
     }
   };
@@ -69,7 +69,9 @@ export default async function patchJs(jscode, mapImport = {}, config = {}){
     write: false,
     format: 'iife',
     target: ['es5'],
-    plugins: [resolveCdnPlugin]
+    absWorkingDir: process.cwd(),
+    nodePaths: [path.join(process.cwd(), 'node_modules')],
+    plugins: [virtualInputPlugin]
   });
   return bundled.outputFiles[0].text;
 }
