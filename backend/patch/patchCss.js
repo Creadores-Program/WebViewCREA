@@ -1,13 +1,21 @@
 import postcss from 'postcss';
 import postcssPresetEnv from 'postcss-preset-env';
-import postcssPseudoelements from 'postcss-pseudoelements';
 import autoprefixer from 'autoprefixer';
+
+const singleColonPlugin = () => {
+  return {
+    postcssPlugin: 'convert-single-colon',
+    Rule(rule) {
+      if (rule.selector.includes('::')) {
+        rule.selector = rule.selector.replace(/::([a-zA-Z0-9-]+)/g, ':$1');
+      }
+    }
+  };
+};
 
 export default async function patchCss(css){
   const result = await postcss([
-    postcssPseudoelements({ 
-      single: true
-    }),
+    singleColonPlugin(),
     postcssPresetEnv({
       stage: 0,
       browsers: [
