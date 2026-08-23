@@ -33,11 +33,28 @@ export default async function patchJs(jscode, mapImport = {}, config = {}){
     configFile: false,
     babelrc: false
   });
-  const result = await esbuild.transform(babelR.code, {
-    loader: 'js',
-    target: 'es5',
+  const virtualInputPlugin = {
+    name: 'virtual-entry',
+    setup(build) {
+      build.onResolve({ filter: /^entry$/ }, args => ({
+        path: args.path,
+        namespace: 'virtual'
+      }));
+
+      build.onLoad({ filter: /^entry$/, namespace: 'virtual' }, () => ({
+        contents: babelR.code,
+        loader: 'js',
+        resolveDir: process.cwd()
+      }));
+    }
+  };
+  const bundled = await esbuild.build({
+    entryPoints: ['entry'],
+    bundle: true,
+    write: false,
     format: 'iife',
-    bundle: true
+    target: ['es5'],
+    plugins: [virtualInputPlugin]
   });
-  return result.code;
+  return bundled.outputFiles[0].text;
 }
