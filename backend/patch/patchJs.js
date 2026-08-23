@@ -1,10 +1,11 @@
 import babel from '@babel/core';
 import moduleResolver from 'babel-plugin-module-resolver';
 import presetEnv from '@babel/preset-env';
+import * as esbuild from 'esbuild';
 
 export default async function patchJs(jscode, mapImport = {}, config = {}){
   const isInline = config.isInlineExpression ?? false;
-  const result = await babel.transformAsync(jscode, {
+  const babelR = await babel.transformAsync(jscode, {
     parserOpts: {
       allowReturnOutsideFunction: isInline,
       allowSuperOutsideMethod: isInline
@@ -31,6 +32,12 @@ export default async function patchJs(jscode, mapImport = {}, config = {}){
     ],
     configFile: false,
     babelrc: false
+  });
+  const result = await esbuild.transform(babelR.code, {
+    loader: 'js',
+    target: 'es5',
+    format: 'iife',
+    bundle: true
   });
   return result.code;
 }
