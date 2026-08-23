@@ -18,7 +18,7 @@ async function loadPolyfills(){
   ];
   let scripts = "";
   for(let polyName of polyfills){
-    scripts += '<script>\n'+await readPolyfill(polyName)+'</script>\n';
+    scripts += '<script>\n'+await readPolyfill(polyName)+'\n</script>\n';
   }
   return scripts;
 }
