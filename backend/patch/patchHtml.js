@@ -21,6 +21,12 @@ export default async function patchHtml(html) {
     }
     $importMapScript.remove();
   });
+  const coreJsScript = '<script src="https://cdnjs.cloudflare.com/ajax/libs/core-js/3.38.1/minified.js"></script>';
+  if ($('head').length > 0) {
+    $('head').prepend(coreJsScript);
+  } else {
+    $.root().prepend(coreJsScript);
+  }
   const stylePromises = [];
   $('style').each((_, elem) => {
     const $style = $(elem);
@@ -65,6 +71,7 @@ export default async function patchHtml(html) {
       if (isModule) {
         $script.removeAttr('type');
         $script.removeAttr('nomodule');
+        $script.attr('defer', '');
       }
       $script.attr('type', 'text/javascript');
 
