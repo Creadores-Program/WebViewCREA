@@ -5,6 +5,9 @@ import presetEnv from '@babel/preset-env';
 export default async function patchJs(jscode, mapImport = {}, config = {}){
   const isInline = config.isInlineExpression ?? false;
   const result = await babel.transformAsync(jscode, {
+    compact: isInline ? true : false,
+    minified: isInline ? true : false,
+    comments: false,
     parserOpts: {
       allowReturnOutsideFunction: isInline,
       allowSuperOutsideMethod: isInline
@@ -31,5 +34,10 @@ export default async function patchJs(jscode, mapImport = {}, config = {}){
     configFile: false,
     babelrc: false
   });
+  let code = result.code;
+
+  if (isInline) {
+    code = code.replace(/[\r\n]+/g, ' ').trim();
+  }
   return result.code;
 }
