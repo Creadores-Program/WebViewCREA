@@ -1,6 +1,27 @@
 import * as cheerio from 'cheerio';
 import patchCss from './patchCss.js';
 import patchJs from './patchJs.js';
+import { readFile } from 'node:fs/promises';
+
+async function readPolyfill(name){
+  const polyfillTexto = await readFile(
+  new URL('../polyfills/'+name+'.js', import.meta.url),
+    'utf-8'
+  );
+}
+
+async function loadPolyfills(){
+  let polyfills = [
+    "customEventPoly",
+    "runtime",
+    "url-polyfill"
+  ];
+  let scripts = "";
+  for(let polyName of polyfills){
+    scripts += '<script>\n'+await readPolyfill(polyName)+'</script>\n';
+  }
+  return scripts;
+}
 
 export default async function patchHtml(html) {
   const $ = cheerio.load(html, { decodeEntities: false });
@@ -21,9 +42,9 @@ export default async function patchHtml(html) {
     }
     $importMapScript.remove();
   });
-  const coreJsScript = '<script src="https://cdnjs.cloudflare.com/ajax/libs/core-js/3.38.1/minified.js"></script>';
+  const coreJsScript = '<script src="https://cdnjs.cloudflare.com/ajax/libs/core-js/3.38.1/minified.js"></script>\n';
   if ($('head').length > 0) {
-    $('head').prepend(coreJsScript);
+    $('head').prepend(coreJsScript+loadPolyfills());
   } else {
     $.root().prepend(coreJsScript);
   }
