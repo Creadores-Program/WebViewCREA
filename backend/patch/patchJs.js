@@ -42,7 +42,7 @@ export default async function patchJs(jscode, mapImport = {}, config = {}){
       }));
 
       build.onLoad({ filter: /^entry$/, namespace: 'virtual' }, () => ({
-        contents: babelResult.code,
+        contents: babelR.code,
         loader: 'js'
       }));
 
