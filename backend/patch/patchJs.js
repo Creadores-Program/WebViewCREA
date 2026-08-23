@@ -1,4 +1,5 @@
 import babel from '@babel/core';
+import moduleResolver from 'babel-plugin-module-resolver';
 
 export default async function patchJs(jscode, mapImport = {}, config = {}){
   const isInline = config.isInlineExpression ?? false;
@@ -21,7 +22,7 @@ export default async function patchJs(jscode, mapImport = {}, config = {}){
     ],
     plugins: [
       [
-        'module-resolver',
+        moduleResolver,
         {
           alias: mapImport.imports || {}
         }
