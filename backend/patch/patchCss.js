@@ -3,7 +3,7 @@ import postcssPresetEnv from 'postcss-preset-env';
 import autoprefixer from 'autoprefixer';
 
 export default async function patchCss(css){
-  return await postcss([
+  const result = await postcss([
     postcssPresetEnv({
       stage: 0,
       browsers: [
@@ -34,4 +34,5 @@ export default async function patchCss(css){
       grid: 'autoplace'
     })
   ]).process(css, { from: undefined });
+  return result.css;
 }
