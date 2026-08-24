@@ -18,7 +18,7 @@ async function loadPolyfills(){
   ];
   let scripts = "";
   for(let polyName of polyfills){
-    scripts += '<script>\n'+await readPolyfill(polyName)+'\n</script>\n';
+    scripts += '<script type="text/javascript">\n'+await readPolyfill(polyName)+'\n</script>\n';
   }
   return scripts;
 }
@@ -66,17 +66,9 @@ export default async function patchHtml(html) {
   if ($('head').length > 0) {
     $('head').prepend(coreJsScript+(await loadPolyfills()));
   } else {
-    $.root().prepend(coreJsScript);
+    $.root().prepend(coreJsScript+(await loadPolyfills()));
   }
   const stylePromises = [];
-  $('link[rel="stylesheet"]').each((_, elem) => {
-    const $link = $(elem);
-    const url = $link.attr('href') || $link.attr('src');
-    const promise = patchCss(null, resolveUrl(url, baseUrl)).then((patchedCss) => {
-      $link.replaceWith("<style>/n"+patchedCss+"/n</style>");
-    });
-    stylePromises.push(promise);
-  });
   $('style').each((_, elem) => {
     const $style = $(elem);
     const rawType = $style.attr('type');
@@ -92,6 +84,14 @@ export default async function patchHtml(html) {
         stylePromises.push(promise);
       }
     }
+  });
+  $('link[rel="stylesheet"]').each((_, elem) => {
+    const $link = $(elem);
+    const url = $link.attr('href') || $link.attr('src');
+    const promise = patchCss(null, resolveUrl(url, baseUrl)).then((patchedCss) => {
+      $link.replaceWith('<style type="text/css">/n'+patchedCss+"/n</style>");
+    });
+    stylePromises.push(promise);
   });
   $('[style]').each((_, elem) => {
     const $elem = $(elem);
