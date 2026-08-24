@@ -23,8 +23,28 @@ async function loadPolyfills(){
   return scripts;
 }
 
+function resolveUrl(url, base){
+  if(!url || !base){
+    return url;
+  }
+  const prefixIg = ['http:', 'https:', 'data:', 'javascript:', 'blob:', 'mailto:', '#'];
+  const isIg = prefixIg.some(prefix => 
+    url.toLowerCase().startsWith(prefix)
+  );
+
+  if (isIg) {
+    return url;
+  }
+  try{
+    return new URL(url, base).href;
+  }catch(e){
+    return url;
+  }
+}
+
 export default async function patchHtml(html) {
   const $ = cheerio.load(html, { decodeEntities: false });
+  const baseUrl = $('webviewcrea')?.attr('baseurl');
   const EVENT_ATTR_REGEX = /^on[a-z]+$/i;
   let globalImportMap = { imports: {} };
   $('script[type="importmap"]').each((_, elem) => {
@@ -49,6 +69,14 @@ export default async function patchHtml(html) {
     $.root().prepend(coreJsScript);
   }
   const stylePromises = [];
+  $('link[rel="stylesheet"]').each((_, elem) => {
+    const $link = $(elem);
+    const url = $link.attr('href') || $link.attr('src');
+    const promise = patchCss(null, resolveUrl(url, baseUrl)).then((patchedCss) => {
+      $link.replaceWith("<style>/n"+patchedCss+"/n</style>");
+    });
+    stylePromises.push(promise);
+  });
   $('style').each((_, elem) => {
     const $style = $(elem);
     const rawType = $style.attr('type');
@@ -60,8 +88,6 @@ export default async function patchHtml(html) {
       if (cssContent && cssContent.trim()) {
         const promise = patchCss(cssContent).then((patchedCss) => {
           $style.text(patchedCss);
-        }).catch((err) => {
-          console.error('Error al parchear CSS inline:', err);
         });
         stylePromises.push(promise);
       }
