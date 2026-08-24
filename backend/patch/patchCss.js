@@ -1,5 +1,7 @@
 import postcss from 'postcss';
 import postcssPresetEnv from 'postcss-preset-env';
+import postcssImport from 'postcss-import';
+import postcssUrl from 'postcss-url';
 import autoprefixer from 'autoprefixer';
 
 const singleColonPlugin = () => {
@@ -13,8 +15,16 @@ const singleColonPlugin = () => {
   };
 };
 
-export default async function patchCss(css){
-  const result = await postcss([
+export default async function patchCss(css, sourceUrl){
+  if(sourceUrl){
+    let request = await fetch(sourceUrl);
+    if(!request.ok){
+      css = css || "";
+    }
+    css = await request.text();
+  }
+  const plugins = [
+    postcssImport(),
     singleColonPlugin(),
     postcssPresetEnv({
       stage: 0,
@@ -34,6 +44,13 @@ export default async function patchCss(css){
         'custom-properties': { preserve: false }
       }
     })
-  ]).process(css, { from: undefined });
+  ];
+  if(sourceUrl){
+    plugins.push(postcssUrl({
+      url: 'absolute',
+      baseUrl: sourceUrl
+    }));
+  }
+  const result = await postcss(plugins).process(css, { from: undefined });
   return result.css;
 }
