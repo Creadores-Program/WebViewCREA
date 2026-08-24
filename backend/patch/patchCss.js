@@ -3,6 +3,7 @@ import postcssPresetEnv from 'postcss-preset-env';
 import postcssImport from 'postcss-import';
 import postcssUrl from 'postcss-url';
 import autoprefixer from 'autoprefixer';
+import userAgent from '../utils/UserAgent.js';
 
 const singleColonPlugin = () => {
   return {
@@ -17,7 +18,14 @@ const singleColonPlugin = () => {
 
 export default async function patchCss(css, sourceUrl){
   if(sourceUrl && !css){
-    let request = await fetch(sourceUrl);
+    const baseHost = new URL(sourceUrl).hostname;
+    let request = await fetch(sourceUrl, {
+      headers: {
+        'User-Agent': userAgent,
+        'host': baseHost,
+        'origin': baseHost
+      }
+    });
     if(!request.ok){
       css = css || "";
     }
