@@ -5,7 +5,7 @@ import { readFile } from 'node:fs/promises';
 import userAgent from '../utils/UserAgent.js';
 
 async function readPolyfill(name){
-  const polyfillTexto = await readFile(
+  return await readFile(
   new URL('../polyfills/'+name+'.js', import.meta.url),
     'utf-8'
   );
