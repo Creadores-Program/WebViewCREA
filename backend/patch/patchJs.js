@@ -64,7 +64,11 @@ function es5SyncRemoteProxyPlugin({ types: t }, options) {
           })();
         `;
 
-        path.replaceWithMultiple(babel.parseModule(polyfillCode).program.body);
+        const parsedAst = babel.parse(polyfillCode, {
+          sourceType: 'script',
+          allowReturnOutsideFunction: true
+        });
+        path.replaceWithMultiple(parsedAst.program.body);
       }
     }
   };
