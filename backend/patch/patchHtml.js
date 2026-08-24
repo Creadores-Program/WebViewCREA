@@ -78,7 +78,7 @@ export default async function patchHtml(html) {
       $style.attr('type', 'text/css');
       const cssContent = $style.html();
       if (cssContent && cssContent.trim()) {
-        const promise = patchCss(cssContent).then((patchedCss) => {
+        const promise = patchCss(cssContent, baseUrl).then((patchedCss) => {
           $style.text(patchedCss);
         });
         stylePromises.push(promise);
