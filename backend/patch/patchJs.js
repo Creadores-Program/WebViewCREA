@@ -10,8 +10,7 @@ function es5SyncRemoteProxyPlugin({ types: t }, options) {
     if ((resolved.startsWith('./') || resolved.startsWith('../')) && scriptUrl) {
       try {
         resolved = new URL(resolved, scriptUrl).href;
-      } catch (e) {
-      }
+      } catch (e) {}
     }
     return resolved;
   }
@@ -64,10 +63,14 @@ function es5SyncRemoteProxyPlugin({ types: t }, options) {
           })();
         `;
 
-        const parsedAst = babel.parse(polyfillCode, {
-          sourceType: 'script',
-          allowReturnOutsideFunction: true
+        const parsedAst = babel.parseSync(polyfillCode, {
+          configFile: false,
+          babelrc: false,
+          parserOpts: {
+            allowReturnOutsideFunction: true
+          }
         });
+
         path.replaceWithMultiple(parsedAst.program.body);
       }
     }
