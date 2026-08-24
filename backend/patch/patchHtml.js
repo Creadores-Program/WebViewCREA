@@ -2,6 +2,7 @@ import * as cheerio from 'cheerio';
 import patchCss from './patchCss.js';
 import patchJs from './patchJs.js';
 import { readFile } from 'node:fs/promises';
+import userAgent from '../utils/UserAgent.js';
 
 async function readPolyfill(name){
   const polyfillTexto = await readFile(
@@ -45,6 +46,7 @@ function resolveUrl(url, base){
 export default async function patchHtml(html) {
   const $ = cheerio.load(html, { decodeEntities: false });
   const baseUrl = $('webviewcrea')?.attr('baseurl');
+  const baseHost = new URL(baseUrl).hostname;
   const EVENT_ATTR_REGEX = /^on[a-z]+$/i;
   let globalImportMap = { imports: {} };
   $('script[type="importmap"]').each((_, elem) => {
@@ -62,12 +64,6 @@ export default async function patchHtml(html) {
     }
     $importMapScript.remove();
   });
-  const coreJsScript = '<script src="https://cdnjs.cloudflare.com/ajax/libs/core-js/3.38.1/minified.js"></script>\n';
-  if ($('head').length > 0) {
-    $('head').prepend(coreJsScript+(await loadPolyfills()));
-  } else {
-    $.root().prepend(coreJsScript+(await loadPolyfills()));
-  }
   const stylePromises = [];
   $('style').each((_, elem) => {
     const $style = $(elem);
@@ -126,7 +122,13 @@ export default async function patchHtml(html) {
       const jsContent = $script.html();
       if (src) {
         let srcP = resolveUrl(src, baseUrl);
-        const promise = fetch(srcP).then((res) => {
+        const promise = fetch(srcP, {
+          headers: {
+            'User-Agent': userAgent,
+            'host': baseHost,
+            'origin': baseHost
+          }
+        }).then((res) => {
           if (!res.ok) throw new Error(`HTTP ${res.status} al obtener ${srcP}`);
           return res.text();
         })
@@ -148,6 +150,13 @@ export default async function patchHtml(html) {
       }
     }
   });
+  const coreJsScript = '<script src="https://cdnjs.cloudflare.com/ajax/libs/core-js/3.38.1/minified.js"></script>\n';
+  if ($('head').length > 0) {
+    $('head').prepend(coreJsScript+(await loadPolyfills()));
+  } else {
+    $.root().prepend(coreJsScript+(await loadPolyfills()));
+  }
+
   const eventPromises = [];
   $('*').each((_, elem) => {
     const attribs = elem.attribs || {};
