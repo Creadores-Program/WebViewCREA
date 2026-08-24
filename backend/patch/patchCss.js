@@ -16,7 +16,7 @@ const singleColonPlugin = () => {
 };
 
 export default async function patchCss(css, sourceUrl){
-  if(sourceUrl){
+  if(sourceUrl && !css){
     let request = await fetch(sourceUrl);
     if(!request.ok){
       css = css || "";
