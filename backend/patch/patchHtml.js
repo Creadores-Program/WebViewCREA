@@ -122,9 +122,26 @@ export default async function patchHtml(html) {
       }
       $script.attr('type', 'text/javascript');
 
+      const src = $script.attr('src');
       const jsContent = $script.html();
+      if (src) {
+        let srcP = resolveUrl(src, baseUrl);
+        const promise = fetch(srcP).then((res) => {
+          if (!res.ok) throw new Error(`HTTP ${res.status} al obtener ${srcP}`);
+          return res.text();
+        })
+        .then((remoteJs) => {
+          return patchJs(remoteJs, globalImportMap, { scriptUrl: srcP });
+        })
+        .then((patchedJs) => {
+            $script.removeAttr('src');
+            $script.text(patchedJs);
+        });
+        scriptPromises.push(promise);
+        return;
+      }
       if (jsContent && jsContent.trim()) {
-        const promise = patchJs(jsContent, globalImportMap).then((patchedJs) => {
+        const promise = patchJs(jsContent, globalImportMap, { scriptUrl: baseUrl }).then((patchedJs) => {
           $script.text(patchedJs);
         });
         scriptPromises.push(promise);
