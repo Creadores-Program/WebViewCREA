@@ -20,7 +20,7 @@ android {
         }
         legacy20 {
             dimension "sdkVersion"
-            minSdkVersion 5
+            minSdkVersion 7
         }
     }
 }
