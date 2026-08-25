@@ -43,7 +43,7 @@ function resolveUrl(url, base){
   }
 }
 
-export default async function patchHtml(html) {
+export default async function patchHtml(html, userAgentO) {
   const $ = cheerio.load(html, { decodeEntities: false });
   const baseUrl = $('webviewcrea')?.attr('baseurl');
   const baseHost = new URL(baseUrl).hostname;
@@ -124,7 +124,7 @@ export default async function patchHtml(html) {
         let srcP = resolveUrl(src, baseUrl);
         const promise = fetch(srcP, {
           headers: {
-            'User-Agent': userAgent,
+            'User-Agent': userAgentO || userAgent,
             'host': baseHost,
             'origin': baseHost
           }
