@@ -16,12 +16,12 @@ const singleColonPlugin = () => {
   };
 };
 
-export default async function patchCss(css, sourceUrl){
+export default async function patchCss(css, sourceUrl, userAgentO){
   if(sourceUrl && !css){
     const baseHost = new URL(sourceUrl).hostname;
     let request = await fetch(sourceUrl, {
       headers: {
-        'User-Agent': userAgent,
+        'User-Agent': userAgentO || userAgent,
         'host': baseHost,
         'origin': baseHost
       }
