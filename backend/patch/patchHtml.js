@@ -3,6 +3,7 @@ import patchCss from './patchCss.js';
 import patchJs from './patchJs.js';
 import { readFile } from 'node:fs/promises';
 import userAgent from '../utils/UserAgent.js';
+import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
