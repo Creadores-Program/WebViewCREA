@@ -8,4 +8,8 @@ public class NetClient{
     .writeTimeout(60, TimeUnit.SECONDS)
     .readTimeout(60, TimeUnit.SECONDS)
     .build();
+
+  public NetRes post(String url, String userAgent, String data){}
+
+  public NetRes get(String url, String userAgent){}
 }
