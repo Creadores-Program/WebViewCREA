@@ -2,10 +2,6 @@ apply plugin: 'com.android.library'
 group = 'org.CreadoresProgram'
 version = '1.1.0'
 
-dependencies {
-    implementation 'com.squareup.okhttp3:okhttp:3.12.13'
-}
-
 android {
     namespace 'org.CreadoresProgram.WebViewCREA'
     compileSdkVersion 25
@@ -16,4 +12,19 @@ android {
         versionCode 3
         versionName "1.1.0"
     }
+    flavorDimensions "sdkVersion"
+    productFlavors {
+        standard {
+            dimension "sdkVersion"
+            minSdkVersion 9
+        }
+        legacy20 {
+            dimension "sdkVersion"
+            minSdkVersion 5
+        }
+    }
+}
+
+dependencies {
+    standardImplementation 'com.squareup.okhttp3:okhttp:3.12.13'
 }
