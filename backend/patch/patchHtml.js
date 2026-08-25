@@ -3,12 +3,17 @@ import patchCss from './patchCss.js';
 import patchJs from './patchJs.js';
 import { readFile } from 'node:fs/promises';
 import userAgent from '../utils/UserAgent.js';
+import path from 'node:path';
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+const POLYFILL_PATHS = {
+  customEventPoly: path.join(__dirname, '../polyfills/customEventPoly.js'),
+  runtime: path.join(__dirname, '../polyfills/runtime.js'),
+  'url-polyfill': path.join(__dirname, '../polyfills/url-polyfill.js'),
+};
 async function readPolyfill(name){
-  return await readFile(
-  new URL('../polyfills/'+name+'.js', import.meta.url),
-    'utf-8'
-  );
+  return await readFile(POLYFILL_PATHS[name], 'utf-8');
 }
 
 async function loadPolyfills(){
