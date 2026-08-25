@@ -10,10 +10,12 @@ export default async function handler(req, res) {
     res.status(200).end();
     return;
   }
+  const headersList = await headers();
+  const userAgent = headersList.get('user-agent');
   res.setHeader('Content-Type', 'text/css; charset=utf-8');
   try{
     const data = req.body;
-    const codePatch = await patchCss(data);
+    const codePatch = await patchCss(data, null, userAgent);
     res.status(200).send(codePatch);
   }catch(err){
     console.error(err);
