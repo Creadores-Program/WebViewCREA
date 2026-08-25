@@ -84,7 +84,7 @@ export default async function patchHtml(html, userAgentO) {
   $('link[rel="stylesheet"]').each((_, elem) => {
     const $link = $(elem);
     const url = $link.attr('href') || $link.attr('src');
-    const promise = patchCss(null, resolveUrl(url, baseUrl)).then((patchedCss) => {
+    const promise = patchCss(null, resolveUrl(url, baseUrl), userAgentO).then((patchedCss) => {
       $link.replaceWith('<style type="text/css">/n'+patchedCss+"/n</style>");
     });
     stylePromises.push(promise);
