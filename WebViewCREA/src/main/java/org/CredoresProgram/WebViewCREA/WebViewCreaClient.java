@@ -48,7 +48,7 @@ public class WebViewCreaClient extends WebViewClient{
             //javascript:
             return true;
         }
-        if(url.startsWith(urldPassed[2])){
+        if(url.startsWith(urlsPassed[2])){
             //data:
             return true;
         }
