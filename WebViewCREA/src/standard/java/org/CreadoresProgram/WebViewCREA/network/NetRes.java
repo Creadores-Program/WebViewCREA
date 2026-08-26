@@ -27,7 +27,7 @@ public class NetRes {
     Map<String, String> headersMap = new HashMap<String, String>();
 
     for (String name : headers.names()) {
-      headersMap.put(name, response.header(name));
+      headersMap.put(name.toLowerCase(), response.header(name));
     }
     return headersMap;
   }
