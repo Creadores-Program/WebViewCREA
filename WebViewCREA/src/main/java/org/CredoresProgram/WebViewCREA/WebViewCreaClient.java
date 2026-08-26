@@ -19,6 +19,7 @@ public class WebViewCreaClient extends WebViewClient{
     private final NetClient client = new NetClient();
     private final ExecutorService background = Executors.newCachedThreadPool();
     private boolean desktop = false;
+    private static final String[] urlsPassed = { "http", "https", "data", "javascript" };
 
     @SuppressWarnings("deprecation")
     @Override
@@ -33,8 +34,23 @@ public class WebViewCreaClient extends WebViewClient{
 
     private boolean uniShouldOverrideUrlLoading(final WebView view, final String url){
         if(urlsVerified.contains(url)){
-            urldVerified.remove(url);
+            urlsVerified.remove(url);
             return false;
+        }
+        boolean urlPassed = false;
+        for(String scheme : urlsPassed){
+            if(url.startsWith(scheme)){
+                urlPassed = true;
+                break;
+            }
+        }
+        if(url.startsWith(urlsPassed[3])){
+            //javascript:
+            return true;
+        }
+        if(url.startsWith(urldPassed[2])){
+            //data:
+            return true;
         }
         background.execute(new Runnable() {
             @Override public void run() {
@@ -50,13 +66,13 @@ public class WebViewCreaClient extends WebViewClient{
                     String contentType = headers.get("content-type").toLowerCase();
                     if (contentType.contains("text/html")) {
                         urlsVerified.add(url);
-                        patchHtml(view, res.getData());
+                        patchHtml(view, res.getData(), url);
                     } else if (contentType.contains("text/css")) {
                         urlsVerified.add(url);
                         patchCss(view, res.getData());
                     } else if (contentType.contains("javascript") || contentType.contains("ecmascript")) {
                         urlsVerified.add(url);
-                        patchJs(view, res.getData());
+                        patchJs(view, res.getData(), url, false);
                     }else{
                         urlsVerified.add(url);
                         view.loadUrl(url);
@@ -85,7 +101,7 @@ public class WebViewCreaClient extends WebViewClient{
     public void setDesktop(boolean desktop){
         this.desktop = desktop;
     }
-    private void patchHtml(WebView view, String data) throws Exception {}
-    private void patchJs(WebView view, String data) throws Exception {}
+    private void patchHtml(WebView view, String data, String url) throws Exception {}
+    private void patchJs(WebView view, String data, String url, boolean execute) throws Exception {}
     private void patchCss(WebView view, String data)throws Exception {}
 }
