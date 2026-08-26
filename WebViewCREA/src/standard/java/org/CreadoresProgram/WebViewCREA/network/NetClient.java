@@ -1,10 +1,14 @@
 package org.CreadoresProgram.WebViewCREA.network;
 
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 import java.io.IOException;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.RequestBody;
 import okhttp3.Response;
+import okhttp3.MediaType;
+
 public class NetClient{
   private OkHttpClient clientHt = new OkHttpClient.Builder()
     .connectTimeout(60, TimeUnit.SECONDS)
@@ -17,7 +21,7 @@ public class NetClient{
 
   public NetRes post(String url, String userAgent, boolean isDesktop, String data) throws IOException{
     RequestBody body = RequestBody.create(mediaType, data);
-    Request req = Request.Builder()
+    Request req = new Request.Builder()
       .url(url)
       .post(body)
       .header("Accept-Language", lang)
