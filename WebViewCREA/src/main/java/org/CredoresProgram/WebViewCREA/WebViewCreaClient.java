@@ -12,6 +12,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import org.CreadoresProgram.WebViewCREA.network.NetClient;
+import org.CreadoresProgram.WebViewCREA.network.NetRes;
 
 public class WebViewCreaClient extends WebViewClient{
     private Set<String> urlsVerified = new HashSet<String>();
@@ -31,6 +32,10 @@ public class WebViewCreaClient extends WebViewClient{
     }
 
     private boolean uniShouldOverrideUrlLoading(final WebView view, final String url){
+        if(urlsVerified.contains(url)){
+            urldVerified.remove(url);
+            return false;
+        }
         background.execute(new Runnable() {
             @Override public void run() {
                 NetRes res = null;
@@ -38,18 +43,26 @@ public class WebViewCreaClient extends WebViewClient{
                     res = client.get(url, view.getSettings().getUserAgentString(), desktop);
                     Map<String, String> headers = res.getHeaders();
                     if(!headers.containsKey("content-type")){
+                        urlsVerified.add(url);
                         view.loadUrl(url);
                         return;
                     }
                     String contentType = headers.get("content-type").toLowerCase();
                     if (contentType.contains("text/html")) {
+                        urlsVerified.add(url);
                         patchHtml(view, res.getData());
                     } else if (contentType.contains("text/css")) {
+                        urlsVerified.add(url);
                         patchCss(view, res.getData());
                     } else if (contentType.contains("javascript") || contentType.contains("ecmascript")) {
+                        urlsVerified.add(url);
                         patchJs(view, res.getData());
+                    }else{
+                        urlsVerified.add(url);
+                        view.loadUrl(url);
                     }
                 }catch(Exception e){
+                    urlsVerified.add(url);
                     view.loadUrl(url);
                     e.printStackTrace();
                 }finally{
