@@ -36,7 +36,7 @@ public class NetClient{
   }
 
   public NetRes get(String url, String userAgent, boolean isDesktop) throws IOException{
-    Request req = Request.Builder()
+    Request req = new Request.Builder()
       .url(url)
       .header("Accept-Language", lang)
       .header("User-Agent", userAgent)
