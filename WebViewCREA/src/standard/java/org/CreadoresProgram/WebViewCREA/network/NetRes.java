@@ -31,7 +31,7 @@ public class NetRes {
     }
     return headersMap;
   }
-  public String getData(){
+  public String getData() throws IOException {
     return response.body().string();
   }
   public void close(){
