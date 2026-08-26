@@ -25,7 +25,7 @@ public class NetRes {
             List<String> values = entry.getValue();
             
             if (key != null && values != null && !values.isEmpty()) {
-                headersMap.put(key, values.get(values.size() - 1));
+                headersMap.put(key.toLowerCase(), values.get(values.size() - 1));
             }
         }
         return headersMap;
