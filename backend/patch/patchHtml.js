@@ -49,7 +49,7 @@ function resolveUrl(url, base){
   }
 }
 
-export default async function patchHtml(html, userAgentO) {
+export default async function patchHtml(html, headers) {
   const $ = cheerio.load(html, { decodeEntities: false });
   const baseUrl = $('webviewcrea')?.attr('baseurl');
   const baseHost = new URL(baseUrl).hostname;
@@ -90,7 +90,7 @@ export default async function patchHtml(html, userAgentO) {
   $('link[rel="stylesheet"]').each((_, elem) => {
     const $link = $(elem);
     const url = $link.attr('href') || $link.attr('src');
-    const promise = patchCss(null, resolveUrl(url, baseUrl), userAgentO).then((patchedCss) => {
+    const promise = patchCss(null, resolveUrl(url, baseUrl), headers).then((patchedCss) => {
       $link.replaceWith('<style type="text/css">/n'+patchedCss+"/n</style>");
     });
     stylePromises.push(promise);
@@ -130,7 +130,7 @@ export default async function patchHtml(html, userAgentO) {
         let srcP = resolveUrl(src, baseUrl);
         const promise = fetch(srcP, {
           headers: {
-            'User-Agent': userAgentO || userAgent,
+            ...headers,
             'host': baseHost,
             'origin': baseHost
           }
