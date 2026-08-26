@@ -6,11 +6,18 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.CreadoresProgram.WebViewCREA.network.NetClient;
 
 public class WebViewCreaClient extends WebViewClient{
-    private NetClient client = new NetClient();
+    private Set<String> urlsVerified = new HashSet<String>();
+    private final NetClient client = new NetClient();
+    private final ExecutorService background = Executors.newCachedThreadPool();
+    private boolean desktop = false;
 
     @SuppressWarnings("deprecation")
     @Override
@@ -23,12 +30,49 @@ public class WebViewCreaClient extends WebViewClient{
         return uniShouldOverrideUrlLoading(view, url);
     }
 
-    private boolean uniShouldOverrideUrlLoading(WebView view, String url){
-        //code...
+    private boolean uniShouldOverrideUrlLoading(final WebView view, final String url){
+        background.execute(new Runnable() {
+            @Override public void run() {
+                NetRes res = null;
+                try{
+                    res = client.get(url, view.getSettings().getUserAgentString(), desktop);
+                    Map<String, String> headers = res.getHeaders();
+                    if(!headers.containsKey("content-type")){
+                        view.loadUrl(url);
+                        return;
+                    }
+                    String contentType = headers.get("content-type").toLowerCase();
+                    if (contentType.contains("text/html")) {
+                        patchHtml(view, res.getData());
+                    } else if (contentType.contains("text/css")) {
+                        patchCss(view, res.getData());
+                    } else if (contentType.contains("javascript") || contentType.contains("ecmascript")) {
+                        patchJs(view, res.getData());
+                    }
+                }catch(Exception e){
+                    view.loadUrl(url);
+                    e.printStackTrace();
+                }finally{
+                    if(res != null){
+                        res.close();
+                    }
+                }
+            }
+        });
         return true;
     }
 
     public NetClient getNetClient(){
         return this.client;
     }
+
+    public boolean isDesktop(){
+        return this.desktop;
+    }
+    public void setDesktop(boolean desktop){
+        this.desktop = desktop;
+    }
+    private void patchHtml(WebView view, String data) throws Exception {}
+    private void patchJs(WebView view, String data) throws Exception {}
+    private void patchCss(WebView view, String data)throws Exception {}
 }
