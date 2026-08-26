@@ -25,5 +25,5 @@ android {
 }
 
 dependencies {
-    standardImplementation 'com.squareup.okhttp3:okhttp:3.12.13'
+    standardCompileOnly 'com.squareup.okhttp3:okhttp:3.12.13'
 }
