@@ -24,10 +24,10 @@ public class NetRes {
 
   public Map<String, String> getHeaders(){
     Headers headers = response.headers();
-    Map<String, String> HeadersMap = new HashMap<String, String>();
+    Map<String, String> headersMap = new HashMap<String, String>();
 
     for (String name : headers.names()) {
-      HeadersMap.put(name, response.header(name));
+      headersMap.put(name, response.header(name));
     }
     return headersMap;
   }
