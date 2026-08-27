@@ -123,7 +123,6 @@ public class WebViewCreaClient extends WebViewClient{
                 res.close();
             }
         }
-        return "";
     }
     public enum UserAgentsIds{
         DEFAULT("default"),//Chrome Mobile 151+ (Android 10)
