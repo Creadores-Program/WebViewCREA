@@ -26,6 +26,13 @@ public class WebViewCreaClient extends WebViewClient{
     private static final String PROXY_PATCH_JS = PROXY_DEF_URL+"api/patchJS";
     private static final String PROXY_PATCH_CSS = PROXY_DEF_URL+"api/patchCSS";
 
+    private static final String REGEX_HEADTAG = "(?i)(<head\\s*)>";
+
+    private static final String MIMETYPE_HTML = "text/html";
+    private static final String MIMETYPE_CSS = "text/css";
+    private static final String MIMETYPE_JS = "text/js";
+    private static final String ENCODE = "UTF-8";
+
     @SuppressWarnings("deprecation")
     @Override
     public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
@@ -54,6 +61,12 @@ public class WebViewCreaClient extends WebViewClient{
         }
         if(url.startsWith(urlsPassed[3])){
             //javascript:
+            final String data = url.replaceFirst(urlsPassed[3]+":", "");
+            background.execute(new Runnable(){
+                @Override public void run(){
+                    patchJS(view, data, url, true);
+                }
+            });
             return true;
         }
         if(url.startsWith(urlsPassed[2])){
@@ -72,12 +85,12 @@ public class WebViewCreaClient extends WebViewClient{
                         return;
                     }
                     String contentType = headers.get("content-type").toLowerCase();
-                    if (contentType.contains("text/html")) {
+                    if (contentType.contains(MIMETYPE_HTML)) {
                         urlsVerified.add(url);
                         patchHtml(view, res.getData(), url);
-                    } else if (contentType.contains("text/css")) {
+                    } else if (contentType.contains(MIMETYPE_CSS)) {
                         urlsVerified.add(url);
-                        patchCss(view, res.getData());
+                        patchCss(view, res.getData(), url);
                     } else if (contentType.contains("javascript") || contentType.contains("ecmascript")) {
                         urlsVerified.add(url);
                         patchJs(view, res.getData(), url, false);
@@ -99,6 +112,10 @@ public class WebViewCreaClient extends WebViewClient{
         return true;
     }
 
+    private boolean isSupportMimetype(String contentType){
+        return contentType.contains(MIMETYPE_HTML) || contentType.contains(MIMETYPE_CSS) || contentType.contains("javascript") || contentType.contains("ecmascript");
+    }
+
     public NetClient getNetClient(){
         return this.client;
     }
@@ -109,9 +126,51 @@ public class WebViewCreaClient extends WebViewClient{
     public void setDesktop(boolean desktop){
         this.desktop = desktop;
     }
-    private void patchHtml(WebView view, String data, String url) throws Exception {}
-    private void patchJs(WebView view, String data, String url, boolean execute) throws Exception {}
-    private void patchCss(WebView view, String data)throws Exception {}
+    private void patchHtml(WebView view, String data, String url){
+        data = insertTagWebView(data, url);
+        NetRes res = null;
+        try{
+            res = client.post(PROXY_PATCH_HTML, view.getSettings().getUserAgentString(), desktop, data);
+            data = res.getData();
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+        view.loadDataWithBaseURL(url, data, MIMETYPE_HTML, ENCODE, null);
+    }
+    private String insertTagWebView(String data, String url){
+        url = url.replace("\"", "&quot;");
+        if(data.matches("(?s).*"+REGEX_HEADTAG + ".*")){
+            return data.replaceFirst(REGEX_HEADTAG, "$1>" + "<webviewcrea baseurl=\""+url+"\"/>");
+        }else{
+            return "<webviewcrea baseurl=\""+url+"\"/>" + data;
+        }
+    }
+    private void patchJs(WebView view, String data, String url, boolean execute){
+        NetRes res = null;
+        try{
+            res = client.post(PROXY_PATCH_JS, view.getSettings().getUserAgentString(), desktop, data);
+            data = res.getData();
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+        if(execute){
+            url = "javascript:"+data;
+            urlsVerified.add(url);
+            view.loadUrl(url);
+        }else{
+            view.loadDataWithBaseURL(url, data, MIMETYPE_JS, ENCODE, null);
+        }
+    }
+    private void patchCss(WebView view, String data, String url){
+        NetRes res = null;
+        try{
+            res = client.post(PROXY_PATCH_CSS, view.getSettings().getUserAgentString(), desktop, data);
+            data = res.getData();
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+        view.loadDataWithBaseURL(url, data, MIMETYPE_CSS, ENCODE, null);
+    }
     public String getUserAgent(WebView view, UserAgentsIds userAgentId) throws Exception{
         String userStr = userAgentId.toString();
         NetRes res = null;
