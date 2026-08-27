@@ -2,6 +2,8 @@ package org.CredoresProgram.WebViewCREA;
 import android.webkit.WebViewClient;
 import android.webkit.WebView;
 import android.webkit.WebResourceRequest;
+import android.os.Build;
+
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -19,7 +21,7 @@ public class WebViewCreaClient extends WebViewClient{
     private final NetClient client = new NetClient();
     private final ExecutorService background = Executors.newCachedThreadPool();
     private boolean desktop = false;
-    private static final String[] urlsPassed = { "http", "https", "data", "javascript" };
+    private static final String[] urlsPassed = { "http", "https", "javascript" };
     private static final String PROXY_DEF_URL = "https://webviewcrea.vercel.app/";
     private static final String PROXY_GET_USERAGENT = PROXY_DEF_URL+"api/userAgent";
     private static final String PROXY_PATCH_HTML = PROXY_DEF_URL+"api/patchHtml";
@@ -59,18 +61,14 @@ public class WebViewCreaClient extends WebViewClient{
         if(!urlPassed){
             return false;
         }
-        if(url.startsWith(urlsPassed[3])){
+        if(url.startsWith(urlsPassed[2])){
             //javascript:
-            final String data = url.replaceFirst(urlsPassed[3]+":", "");
+            final String data = url.replaceFirst(urlsPassed[2]+":", "");
             background.execute(new Runnable(){
                 @Override public void run(){
                     patchJs(view, data, url, true, false);
                 }
             });
-            return true;
-        }
-        if(url.startsWith(urlsPassed[2])){
-            //data:
             return true;
         }
         background.execute(new Runnable() {
@@ -91,7 +89,7 @@ public class WebViewCreaClient extends WebViewClient{
                     } else if (contentType.contains(MIMETYPE_CSS)) {
                         urlsVerified.add(url);
                         patchCss(view, res.getData(), url);
-                    } else if (contentType.contains("javascript") || contentType.contains("ecmascript")) {
+                    } else if (contentType.contains(urlsPassed[2]) || contentType.contains("ecmascript")) {
                         urlsVerified.add(url);
                         patchJs(view, res.getData(), url, false, false);
                     }else{
@@ -154,12 +152,23 @@ public class WebViewCreaClient extends WebViewClient{
             e.printStackTrace();
         }
         if(execute){
-            url = "javascript:"+data;
+            if(kitkatExecute && Build.VERSION.SDK_INT >= Build.VERSION_CODES.KIT_KAT){
+                evalJsKK(view, data);
+                return;
+            }
+            url = urlsPassed[2]+":"+data;
             urlsVerified.add(url);
             view.loadUrl(url);
         }else{
             view.loadDataWithBaseURL(url, data, MIMETYPE_JS, ENCODE, null);
         }
+    }
+    private static void evalJsKK(final WebView view, final String code){
+        view.post(new Runnable(){
+            @Override public void run(){
+                view.evaluateJavascript(code, null);
+            }
+        });
     }
     private void patchCss(WebView view, String data, String url){
         NetRes res = null;
@@ -182,6 +191,13 @@ public class WebViewCreaClient extends WebViewClient{
                 res.close();
             }
         }
+    }
+    public void evaluateJavascript(final WebView view, final String code){
+        background.execute(new Runnable(){
+            @Override public void run(){
+                patchJs(view, code, code, true, true);
+            }
+        });
     }
     public enum UserAgentsIds{
         DEFAULT("default"),//Chrome Mobile 151+ (Android 10)
