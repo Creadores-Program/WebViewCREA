@@ -92,6 +92,9 @@ public class WebViewCreaClient extends WebViewClient{
                     } else if (contentType.contains(urlsPassed[2]) || contentType.contains("ecmascript")) {
                         urlsVerified.add(url);
                         patchJs(view, res.getData(), url, false, false);
+                    }else if(contentType.contains("text/") || contentType.contains("json")){
+                        urlsVerified.add(url);
+                        view.loadDataWithBaseURL(url, res.getData(), contentType, ENCODE, null);
                     }else{
                         urlsVerified.add(url);
                         view.loadUrl(url);
@@ -108,10 +111,6 @@ public class WebViewCreaClient extends WebViewClient{
             }
         });
         return true;
-    }
-
-    private boolean isSupportMimetype(String contentType){
-        return contentType.contains(MIMETYPE_HTML) || contentType.contains(MIMETYPE_CSS) || contentType.contains("javascript") || contentType.contains("ecmascript");
     }
 
     public NetClient getNetClient(){
@@ -132,6 +131,10 @@ public class WebViewCreaClient extends WebViewClient{
             data = res.getData();
         }catch(Exception e){
             e.printStackTrace();
+        }finally{
+            if(res != null){
+                res.close();
+            }
         }
         view.loadDataWithBaseURL(url, data, MIMETYPE_HTML, ENCODE, null);
     }
@@ -150,6 +153,10 @@ public class WebViewCreaClient extends WebViewClient{
             data = res.getData();
         }catch(Exception e){
             e.printStackTrace();
+        }finally{
+            if(res != null){
+                res.close();
+            }
         }
         if(execute){
             if(kitkatExecute && Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
@@ -177,6 +184,10 @@ public class WebViewCreaClient extends WebViewClient{
             data = res.getData();
         }catch(Exception e){
             e.printStackTrace();
+        }finally{
+            if(res != null){
+                res.close();
+            }
         }
         view.loadDataWithBaseURL(url, data, MIMETYPE_CSS, ENCODE, null);
     }
