@@ -64,7 +64,7 @@ public class WebViewCreaClient extends WebViewClient{
             final String data = url.replaceFirst(urlsPassed[3]+":", "");
             background.execute(new Runnable(){
                 @Override public void run(){
-                    patchJS(view, data, url, true);
+                    patchJs(view, data, url, true, false);
                 }
             });
             return true;
@@ -93,7 +93,7 @@ public class WebViewCreaClient extends WebViewClient{
                         patchCss(view, res.getData(), url);
                     } else if (contentType.contains("javascript") || contentType.contains("ecmascript")) {
                         urlsVerified.add(url);
-                        patchJs(view, res.getData(), url, false);
+                        patchJs(view, res.getData(), url, false, false);
                     }else{
                         urlsVerified.add(url);
                         view.loadUrl(url);
@@ -145,7 +145,7 @@ public class WebViewCreaClient extends WebViewClient{
             return "<webviewcrea baseurl=\""+url+"\"/>" + data;
         }
     }
-    private void patchJs(WebView view, String data, String url, boolean execute){
+    private void patchJs(WebView view, String data, String url, boolean execute, boolean kitkatExecute){
         NetRes res = null;
         try{
             res = client.post(PROXY_PATCH_JS, view.getSettings().getUserAgentString(), desktop, data);
