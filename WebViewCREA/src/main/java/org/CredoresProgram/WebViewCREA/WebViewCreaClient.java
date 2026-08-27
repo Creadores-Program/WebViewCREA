@@ -152,7 +152,7 @@ public class WebViewCreaClient extends WebViewClient{
             e.printStackTrace();
         }
         if(execute){
-            if(kitkatExecute && Build.VERSION.SDK_INT >= Build.VERSION_CODES.KIT_KAT){
+            if(kitkatExecute && Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
                 evalJsKK(view, data);
                 return;
             }
