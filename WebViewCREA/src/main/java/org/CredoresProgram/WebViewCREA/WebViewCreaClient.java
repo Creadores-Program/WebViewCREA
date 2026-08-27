@@ -20,6 +20,11 @@ public class WebViewCreaClient extends WebViewClient{
     private final ExecutorService background = Executors.newCachedThreadPool();
     private boolean desktop = false;
     private static final String[] urlsPassed = { "http", "https", "data", "javascript" };
+    private static final String PROXY_DEF_URL = "https://webviewcrea.vercel.app/";
+    private static final String PROXY_GET_USERAGENT = PROXY_DEF_URL+"api/userAgent";
+    private static final String PROXY_PATCH_HTML = PROXY_DEF_URL+"api/patchHtml";
+    private static final String PROXY_PATCH_JS = PROXY_DEF_URL+"api/patchJS";
+    private static final String PROXY_PATCH_CSS = PROXY_DEF_URL+"api/patchCSS";
 
     @SuppressWarnings("deprecation")
     @Override
@@ -43,6 +48,9 @@ public class WebViewCreaClient extends WebViewClient{
                 urlPassed = true;
                 break;
             }
+        }
+        if(!urlPassed){
+            return false;
         }
         if(url.startsWith(urlsPassed[3])){
             //javascript:
@@ -104,4 +112,37 @@ public class WebViewCreaClient extends WebViewClient{
     private void patchHtml(WebView view, String data, String url) throws Exception {}
     private void patchJs(WebView view, String data, String url, boolean execute) throws Exception {}
     private void patchCss(WebView view, String data)throws Exception {}
+    public String getUserAgent(WebView view, UserAgentsIds userAgentId) throws Exception{
+        String userStr = userAgentId.toString();
+        NetRes res = null;
+        try{
+            res = client.post(PROXY_GET_USERAGENT, view.getSettings().getUserAgentString(), desktop, userStr);
+            return res.getData();
+        }finally{
+            if(res != null){
+                res.close();
+            }
+        }
+        return "";
+    }
+    public enum UserAgentsIds{
+        DEFAULT("default"),//Chrome Mobile 151+ (Android 10)
+        FIREFOX_MOBILE("firefoxMobile"),//Firefox Mobile 154+ (Android 13)
+        SAFARI_MOBILE("safariMobile"),//Safari Mobile 605+ (iPhone 17)
+        CHROME_DESK("chromeDesktop"),//Chrome Desktop 151+ (Linux)
+        FIREFOX_DESK("firefoxDesktop"),//Firefox Desktop 154+ (Linux)
+        SAFARI_DESK("safariDesktop"),//Safari Desktop 605+ (Mac)
+        WEBVIEW_MOBILE("defWebViewCREAMobile"),//WebViewCREA 1.1+ (Android 10)
+        WEBVIEW_DESK("defWebViewCREADesktop");//WebViewCREA 1.1+ (Linux)
+
+        private final String userAgentId;
+
+        UserAgentsIds(String userAgentId){
+            this.userAgentId = userAgentId;
+        }
+        @Override
+        public String toString() {
+            return this.userAgentId;
+        }
+    }
 }
