@@ -113,6 +113,13 @@ public class WebViewCreaClient extends WebViewClient{
         return true;
     }
 
+    public void loadUrl(WebView view, String url){
+        if(!uniShouldOverrideUrlLoading(view, url)){
+            urlsVerified.add(url);
+            view.loadUrl(url);
+        }
+    }
+
     public NetClient getNetClient(){
         return this.client;
     }
