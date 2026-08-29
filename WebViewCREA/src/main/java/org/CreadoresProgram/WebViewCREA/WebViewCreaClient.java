@@ -230,9 +230,10 @@ public class WebViewCreaClient extends WebViewClient{
         return result[0];
     }
     public void evaluateJavascript(final WebView view, final String code){
+        final String userAgent = view.getSettings().getUserAgentString();
         background.execute(new Runnable(){
             @Override public void run(){
-                patchJs(view, code, code, true, true);
+                patchJs(view, code, code, true, true, userAgent);
             }
         });
     }
