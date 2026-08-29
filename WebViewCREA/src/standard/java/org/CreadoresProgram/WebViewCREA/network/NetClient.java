@@ -11,6 +11,7 @@ import okhttp3.MediaType;
 
 public class NetClient{
   private OkHttpClient clientHt = new OkHttpClient.Builder()
+    .connectionPool(new ConnectionPool(5, 5, TimeUnit.MINUTES))
     .connectTimeout(60, TimeUnit.SECONDS)
     .writeTimeout(60, TimeUnit.SECONDS)
     .readTimeout(60, TimeUnit.SECONDS)
@@ -30,6 +31,8 @@ public class NetClient{
       .header("Sec-CH-UA-Mobile", "?" + (isDesktop ? "0" : "1"))
       .header("Sec-CH-UA-Platform", "\""+(isDesktop ? "Linux" : "Android")+"\"")
       .header("Upgrade-Insecure-Requests", "1")
+      .header("Connection", "keep-alive")
+      .header("Keep-Alive", "timeout=60, max=100")
       .build();
     Response res = clientHt.newCall(req).execute();
     return new NetRes(res);
