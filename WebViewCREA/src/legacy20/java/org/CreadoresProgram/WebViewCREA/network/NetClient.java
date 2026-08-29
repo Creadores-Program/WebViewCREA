@@ -16,7 +16,7 @@ public class NetClient {
     private static final int TIMEOUT_MS = 60 * 1000;
     private static final String lang = Locale.getDefault().getLanguage();
 
-    public NetRes post(String url, String userAgent, boolean isDesktop, String data) throws IOException {
+    public NetRes post(String url, String userAgent, boolean isDesktop, String data, String cookie) throws IOException {
         HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
         
         conn.setConnectTimeout(TIMEOUT_MS);
@@ -25,7 +25,7 @@ public class NetClient {
         conn.setRequestMethod("POST");
         conn.setDoOutput(true);
         conn.setRequestProperty("Content-Type", "text/html; charset=utf-8");
-        setCommonHeaders(conn, userAgent, isDesktop);
+        setCommonHeaders(conn, userAgent, isDesktop, cookie);
 
         OutputStream os = null;
         try {
@@ -46,19 +46,19 @@ public class NetClient {
         return new NetRes(conn);
     }
 
-    public NetRes get(String url, String userAgent, boolean isDesktop) throws IOException {
+    public NetRes get(String url, String userAgent, boolean isDesktop, String cookie) throws IOException {
         HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
         
         conn.setConnectTimeout(TIMEOUT_MS);
         conn.setReadTimeout(TIMEOUT_MS);
         
         conn.setRequestMethod("GET");
-        setCommonHeaders(conn, userAgent, isDesktop);
+        setCommonHeaders(conn, userAgent, isDesktop, cookie);
 
         return new NetRes(conn);
     }
 
-    private void setCommonHeaders(HttpURLConnection conn, String userAgent, boolean isDesktop) {
+    private void setCommonHeaders(HttpURLConnection conn, String userAgent, boolean isDesktop, String cookie) {
         conn.setRequestProperty("Accept-Language", lang);
         conn.setRequestProperty("User-Agent", userAgent);
         conn.setRequestProperty("Sec-CH-UA", "\"WebViewCREA\";v=\"1\", \"Chromium\";v=\"125\", \"Not.A/Brand\";v=\"24\"");
@@ -71,5 +71,8 @@ public class NetClient {
         conn.setRequestProperty("Upgrade-Insecure-Requests", "1");
         conn.setRequestProperty("Connection", "keep-alive");
         conn.setRequestProperty("Keep-Alive", "timeout=60, max=100");
+        if(cookie != null && cookie.trim().length() > 0){
+            conn.setRequestProperty("Cookie", cookie);
+        }
     }
 }
