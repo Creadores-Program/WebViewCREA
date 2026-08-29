@@ -8,6 +8,11 @@ import java.util.Locale;
 
 public class NetClient {
 
+    static {
+        System.setProperty("http.keepAlive", "true");
+        System.setProperty("http.maxConnections", "10");
+    }
+
     private static final int TIMEOUT_MS = 60 * 1000;
     private static final String lang = Locale.getDefault().getLanguage();
 
@@ -60,5 +65,7 @@ public class NetClient {
         conn.setRequestProperty("Sec-CH-UA-Mobile", "?" + (isDesktop ? "0" : "1"));
         conn.setRequestProperty("Sec-CH-UA-Platform", "\"" + (isDesktop ? "Linux" : "Android") + "\"");
         conn.setRequestProperty("Upgrade-Insecure-Requests", "1");
+        conn.setRequestProperty("Connection", "keep-alive");
+        conn.setRequestProperty("Keep-Alive", "timeout=60, max=100");
     }
 }
