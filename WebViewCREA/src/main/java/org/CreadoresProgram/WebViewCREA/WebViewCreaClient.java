@@ -2,6 +2,7 @@ package org.CreadoresProgram.WebViewCREA;
 import android.webkit.WebViewClient;
 import android.webkit.WebView;
 import android.webkit.WebResourceRequest;
+import android.webkit.CookieManager;
 import android.os.Build;
 
 import java.io.ByteArrayInputStream;
@@ -60,16 +61,22 @@ public class WebViewCreaClient extends WebViewClient{
             final String data = url.replaceFirst(urlsPassed[2]+":", "");
             background.execute(new Runnable(){
                 @Override public void run(){
-                    patchJs(view, data, url, true, false, userAgent);
+                    patchJs(view, data, url, true, false, userAgent, null);
                 }
             });
             return true;
+        }
+        final String[] cookie = new String[1];
+        try{
+            cookie[0] = CookieManager.getInstance().getCookie(url);
+        }catch(Exception e){
+            cookie[0] = null;
         }
         background.execute(new Runnable() {
             @Override public void run() {
                 NetRes res = null;
                 try{
-                    res = client.get(url, userAgent, desktop);
+                    res = client.get(url, userAgent, desktop, cookie[0]);
                     Map<String, String> headers = res.getHeaders();
                     if(!headers.containsKey("content-type")){
                         loadUrlNative(view, url);
@@ -77,11 +84,11 @@ public class WebViewCreaClient extends WebViewClient{
                     }
                     String contentType = headers.get("content-type").toLowerCase();
                     if (contentType.contains(MIMETYPE_HTML)) {
-                        patchHtml(view, res.getData(), url, userAgent);
+                        patchHtml(view, res.getData(), url, userAgent, cookie[0]);
                     } else if (contentType.contains(MIMETYPE_CSS)) {
-                        patchCss(view, res.getData(), url, userAgent);
+                        patchCss(view, res.getData(), url, userAgent, cookie[0]);
                     } else if (contentType.contains(urlsPassed[2]) || contentType.contains("ecmascript")) {
-                        patchJs(view, res.getData(), url, false, false, userAgent);
+                        patchJs(view, res.getData(), url, false, false, userAgent, cookie[0]);
                     }else if(contentType.contains("text/") || contentType.contains("json")){
                         loadBaseUrlNative(view, url, res.getData(), contentType);
                     }else{
@@ -133,11 +140,11 @@ public class WebViewCreaClient extends WebViewClient{
     public void setDesktop(boolean desktop){
         this.desktop = desktop;
     }
-    private void patchHtml(WebView view, String data, String url, String userAgent){
+    private void patchHtml(WebView view, String data, String url, String userAgent, String cookie){
         data = insertTagWebView(data, url);
         NetRes res = null;
         try{
-            res = client.post(PROXY_PATCH_HTML, userAgent, desktop, data);
+            res = client.post(PROXY_PATCH_HTML, userAgent, desktop, data, cookie);
             data = res.getData();
         }catch(Exception e){
             e.printStackTrace();
@@ -156,10 +163,10 @@ public class WebViewCreaClient extends WebViewClient{
             return "<webviewcrea baseurl=\""+url+"\"/>" + data;
         }
     }
-    private void patchJs(WebView view, String data, String url, boolean execute, boolean kitkatExecute, String userAgent){
+    private void patchJs(WebView view, String data, String url, boolean execute, boolean kitkatExecute, String userAgent, String cookie){
         NetRes res = null;
         try{
-            res = client.post(PROXY_PATCH_JS, userAgent, desktop, data);
+            res = client.post(PROXY_PATCH_JS, userAgent, desktop, data, cookie);
             data = res.getData();
         }catch(Exception e){
             e.printStackTrace();
@@ -186,10 +193,10 @@ public class WebViewCreaClient extends WebViewClient{
             }
         });
     }
-    private void patchCss(WebView view, String data, String url, String userAgent){
+    private void patchCss(WebView view, String data, String url, String userAgent, String cookie){
         NetRes res = null;
         try{
-            res = client.post(PROXY_PATCH_CSS, userAgent, desktop, data);
+            res = client.post(PROXY_PATCH_CSS, userAgent, desktop, data, cookie);
             data = res.getData();
         }catch(Exception e){
             e.printStackTrace();
@@ -209,7 +216,7 @@ public class WebViewCreaClient extends WebViewClient{
                 NetRes res = null;
                 try{
                     String userStr = userAgentId.toString();
-                    res = client.post(PROXY_GET_USERAGENT, "", desktop, userStr);
+                    res = client.post(PROXY_GET_USERAGENT, "", desktop, userStr, null);
                     result[0] = res.getData();
                 }catch(Exception e){
                     result[0] = view.getSettings().getUserAgentString();
@@ -232,7 +239,7 @@ public class WebViewCreaClient extends WebViewClient{
         final String userAgent = view.getSettings().getUserAgentString();
         background.execute(new Runnable(){
             @Override public void run(){
-                patchJs(view, code, code, true, true, userAgent);
+                patchJs(view, code, code, true, true, userAgent, null);
             }
         });
     }
