@@ -55,12 +55,13 @@ public class WebViewCreaClient extends WebViewClient{
         if(!urlPassed){
             return false;
         }
+        final String userAgent = view.getSettings().getUserAgentString();
         if(url.startsWith(urlsPassed[2])){
             //javascript:
             final String data = url.replaceFirst(urlsPassed[2]+":", "");
             background.execute(new Runnable(){
                 @Override public void run(){
-                    patchJs(view, data, url, true, false);
+                    patchJs(view, data, url, true, false, userAgent);
                 }
             });
             return true;
@@ -69,7 +70,7 @@ public class WebViewCreaClient extends WebViewClient{
             @Override public void run() {
                 NetRes res = null;
                 try{
-                    res = client.get(url, view.getSettings().getUserAgentString(), desktop);
+                    res = client.get(url, userAgent, desktop);
                     Map<String, String> headers = res.getHeaders();
                     if(!headers.containsKey("content-type")){
                         loadUrlNative(view, url);
@@ -77,11 +78,11 @@ public class WebViewCreaClient extends WebViewClient{
                     }
                     String contentType = headers.get("content-type").toLowerCase();
                     if (contentType.contains(MIMETYPE_HTML)) {
-                        patchHtml(view, res.getData(), url);
+                        patchHtml(view, res.getData(), url, userAgent);
                     } else if (contentType.contains(MIMETYPE_CSS)) {
-                        patchCss(view, res.getData(), url);
+                        patchCss(view, res.getData(), url, userAgent);
                     } else if (contentType.contains(urlsPassed[2]) || contentType.contains("ecmascript")) {
-                        patchJs(view, res.getData(), url, false, false);
+                        patchJs(view, res.getData(), url, false, false, userAgent);
                     }else if(contentType.contains("text/") || contentType.contains("json")){
                         loadBaseUrlNative(view, url, res.getData(), contentType);
                     }else{
@@ -133,11 +134,11 @@ public class WebViewCreaClient extends WebViewClient{
     public void setDesktop(boolean desktop){
         this.desktop = desktop;
     }
-    private void patchHtml(WebView view, String data, String url){
+    private void patchHtml(WebView view, String data, String url, String userAgent){
         data = insertTagWebView(data, url);
         NetRes res = null;
         try{
-            res = client.post(PROXY_PATCH_HTML, view.getSettings().getUserAgentString(), desktop, data);
+            res = client.post(PROXY_PATCH_HTML, userAgent, desktop, data);
             data = res.getData();
         }catch(Exception e){
             e.printStackTrace();
@@ -156,10 +157,10 @@ public class WebViewCreaClient extends WebViewClient{
             return "<webviewcrea baseurl=\""+url+"\"/>" + data;
         }
     }
-    private void patchJs(WebView view, String data, String url, boolean execute, boolean kitkatExecute){
+    private void patchJs(WebView view, String data, String url, boolean execute, boolean kitkatExecute, String userAgent){
         NetRes res = null;
         try{
-            res = client.post(PROXY_PATCH_JS, view.getSettings().getUserAgentString(), desktop, data);
+            res = client.post(PROXY_PATCH_JS, userAgent, desktop, data);
             data = res.getData();
         }catch(Exception e){
             e.printStackTrace();
@@ -186,10 +187,10 @@ public class WebViewCreaClient extends WebViewClient{
             }
         });
     }
-    private void patchCss(WebView view, String data, String url){
+    private void patchCss(WebView view, String data, String url, String userAgent){
         NetRes res = null;
         try{
-            res = client.post(PROXY_PATCH_CSS, view.getSettings().getUserAgentString(), desktop, data);
+            res = client.post(PROXY_PATCH_CSS, userAgent, desktop, data);
             data = res.getData();
         }catch(Exception e){
             e.printStackTrace();
@@ -209,7 +210,7 @@ public class WebViewCreaClient extends WebViewClient{
                 NetRes res = null;
                 try{
                     String userStr = userAgentId.toString();
-                    res = client.post(PROXY_GET_USERAGENT, view.getSettings().getUserAgentString(), desktop, userStr);
+                    res = client.post(PROXY_GET_USERAGENT, "", desktop, userStr);
                     result[0] = res.getData();
                 }catch(Exception e){
                     result[0] = view.getSettings().getUserAgentString();
