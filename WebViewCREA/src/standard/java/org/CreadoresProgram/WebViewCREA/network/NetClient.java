@@ -1,6 +1,8 @@
 package org.CreadoresProgram.WebViewCREA.network;
 
 import java.util.Locale;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.io.IOException;
 import okhttp3.OkHttpClient;
@@ -9,6 +11,10 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.MediaType;
 import okhttp3.ConnectionPool;
+import okhttp3.Cookie;
+import okhttp3.CookieJar;
+import okhttp3.HttpUrl;
+import android.webkit.CookieManager;
 
 public class NetClient{
   private OkHttpClient clientHt = new OkHttpClient.Builder()
@@ -16,12 +22,37 @@ public class NetClient{
     .connectTimeout(60, TimeUnit.SECONDS)
     .writeTimeout(60, TimeUnit.SECONDS)
     .readTimeout(60, TimeUnit.SECONDS)
+    .cookieJar(new CookieJar() {
+      @Override
+      public void saveFromResponse(HttpUrl url, List<Cookie> cookies) {
+        CookieManager cookieManager = CookieManager.getInstance();
+        for (Cookie cookie : cookies) {
+          cookieManager.setCookie(url.toString(), cookie.toString());
+        }
+      }
+      @Override
+      public List<Cookie> loadForRequest(HttpUrl url) {
+        List<Cookie> cookieList = new ArrayList<Cookie>();
+        CookieManager cookieManager = CookieManager.getInstance();
+        String cookieString = cookieManager.getCookie(url.toString());
+        if (cookieString != null && !cookieString.isEmpty()) {
+          String[] cookies = cookieString.split(";");
+          for (String cookie : cookies) {
+            Cookie parsedCookie = Cookie.parse(url, cookie.trim());
+            if (parsedCookie != null) {
+              cookieList.add(parsedCookie);
+            }
+          }
+        }
+        return cookieList;
+      }
+    })
     .build();
 
   private static final String lang = Locale.getDefault().getLanguage();
   private MediaType mediaType = MediaType.parse("text/html; charset=utf-8");
 
-  public NetRes post(String url, String userAgent, boolean isDesktop, String data) throws IOException{
+  public NetRes post(String url, String userAgent, boolean isDesktop, String data, String cookie) throws IOException{
     RequestBody body = RequestBody.create(mediaType, data);
     Request req = new Request.Builder()
       .url(url)
@@ -38,12 +69,13 @@ public class NetClient{
       .header("Sec-Fetch-Mode", "navigate")
       .header("Sec-Fetch-Site", "cross-site")
       .header("Sec-Fetch-User", "?1")
+      .header("Cookie", (cookie != null) ? cookie : "")
       .build();
     Response res = clientHt.newCall(req).execute();
     return new NetRes(res);
   }
 
-  public NetRes get(String url, String userAgent, boolean isDesktop) throws IOException{
+  public NetRes get(String url, String userAgent, boolean isDesktop, String cookie) throws IOException{
     Request req = new Request.Builder()
       .url(url)
       .header("Accept-Language", lang)
