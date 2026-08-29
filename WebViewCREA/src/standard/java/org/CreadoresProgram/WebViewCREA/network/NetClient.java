@@ -47,6 +47,8 @@ public class NetClient{
       .header("Sec-CH-UA-Mobile", "?" + (isDesktop ? "0" : "1"))
       .header("Sec-CH-UA-Platform", "\""+(isDesktop ? "Linux" : "Android")+"\"")
       .header("Upgrade-Insecure-Requests", "1")
+      .header("Connection", "keep-alive")
+      .header("Keep-Alive", "timeout=60, max=100")
       .build();
     Response res = clientHt.newCall(req).execute();
     return new NetRes(res);
