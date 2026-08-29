@@ -64,6 +64,10 @@ public class NetClient {
         conn.setRequestProperty("Sec-CH-UA", "\"WebViewCREA\";v=\"1\", \"Chromium\";v=\"125\", \"Not.A/Brand\";v=\"24\"");
         conn.setRequestProperty("Sec-CH-UA-Mobile", "?" + (isDesktop ? "0" : "1"));
         conn.setRequestProperty("Sec-CH-UA-Platform", "\"" + (isDesktop ? "Linux" : "Android") + "\"");
+        conn.setRequestProperty("Sec-Fetch-Dest", "document");
+        conn.setRequestProperty("Sec-Fetch-Mode", "navigate");
+        conn.setRequestProperty("Sec-Fetch-Site", "cross-site");
+        conn.setRequestProperty("Sec-Fetch-User", "?1");
         conn.setRequestProperty("Upgrade-Insecure-Requests", "1");
         conn.setRequestProperty("Connection", "keep-alive");
         conn.setRequestProperty("Keep-Alive", "timeout=60, max=100");
