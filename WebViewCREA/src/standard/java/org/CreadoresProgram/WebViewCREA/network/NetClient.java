@@ -34,6 +34,10 @@ public class NetClient{
       .header("Upgrade-Insecure-Requests", "1")
       .header("Connection", "keep-alive")
       .header("Keep-Alive", "timeout=60, max=100")
+      .header("Sec-Fetch-Dest", "document")
+      .header("Sec-Fetch-Mode", "navigate")
+      .header("Sec-Fetch-Site", "cross-site")
+      .header("Sec-Fetch-User", "?1")
       .build();
     Response res = clientHt.newCall(req).execute();
     return new NetRes(res);
@@ -50,6 +54,10 @@ public class NetClient{
       .header("Upgrade-Insecure-Requests", "1")
       .header("Connection", "keep-alive")
       .header("Keep-Alive", "timeout=60, max=100")
+      .header("Sec-Fetch-Dest", "document")
+      .header("Sec-Fetch-Mode", "navigate")
+      .header("Sec-Fetch-Site", "cross-site")
+      .header("Sec-Fetch-User", "?1")
       .build();
     Response res = clientHt.newCall(req).execute();
     return new NetRes(res);
