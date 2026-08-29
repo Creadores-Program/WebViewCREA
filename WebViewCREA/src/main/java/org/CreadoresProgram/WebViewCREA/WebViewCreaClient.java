@@ -33,7 +33,6 @@ public class WebViewCreaClient extends WebViewClient{
     private static final String MIMETYPE_JS = "text/js";
     private static final String ENCODE = "UTF-8";
 
-    @SuppressWarnings("deprecation")
     @Override
     public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
         return uniShouldOverrideUrlLoading(view, request.getUrl().toString());
