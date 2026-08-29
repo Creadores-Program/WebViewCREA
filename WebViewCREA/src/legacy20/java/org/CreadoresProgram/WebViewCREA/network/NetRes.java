@@ -71,8 +71,22 @@ public class NetRes {
     }
 
     public void close() {
-        if (connection != null) {
+        if (connection == null) return;
+        try {
+            InputStream is = connection.getResponseCode() >= 400 
+                    ? connection.getErrorStream() 
+                    : connection.getInputStream();
+
+            if (is != null) {
+                byte[] buffer = new byte[1024];
+                while (is.read(buffer) != -1) {
+                }
+                is.close();
+            }
+        } catch (Exception e) {
             connection.disconnect();
+        } finally {
+            connection = null;
         }
     }
 }
