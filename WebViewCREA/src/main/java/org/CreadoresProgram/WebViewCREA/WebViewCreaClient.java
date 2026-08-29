@@ -8,16 +8,14 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.CountDownLatch;
 
 import org.CreadoresProgram.WebViewCREA.network.NetClient;
 import org.CreadoresProgram.WebViewCREA.network.NetRes;
 
 public class WebViewCreaClient extends WebViewClient{
-    private Set<String> urlsVerified = new HashSet<String>();
     private final NetClient client = new NetClient();
     private final ExecutorService background = Executors.newCachedThreadPool();
     private boolean desktop = false;
@@ -47,10 +45,6 @@ public class WebViewCreaClient extends WebViewClient{
     }
 
     private boolean uniShouldOverrideUrlLoading(final WebView view, final String url){
-        if(urlsVerified.contains(url)){
-            urlsVerified.remove(url);
-            return false;
-        }
         boolean urlPassed = false;
         for(String scheme : urlsPassed){
             if(url.startsWith(scheme)){
@@ -78,30 +72,23 @@ public class WebViewCreaClient extends WebViewClient{
                     res = client.get(url, view.getSettings().getUserAgentString(), desktop);
                     Map<String, String> headers = res.getHeaders();
                     if(!headers.containsKey("content-type")){
-                        urlsVerified.add(url);
-                        view.loadUrl(url);
+                        loadUrlNative(view, url);
                         return;
                     }
                     String contentType = headers.get("content-type").toLowerCase();
                     if (contentType.contains(MIMETYPE_HTML)) {
-                        urlsVerified.add(url);
                         patchHtml(view, res.getData(), url);
                     } else if (contentType.contains(MIMETYPE_CSS)) {
-                        urlsVerified.add(url);
                         patchCss(view, res.getData(), url);
                     } else if (contentType.contains(urlsPassed[2]) || contentType.contains("ecmascript")) {
-                        urlsVerified.add(url);
                         patchJs(view, res.getData(), url, false, false);
                     }else if(contentType.contains("text/") || contentType.contains("json")){
-                        urlsVerified.add(url);
-                        view.loadDataWithBaseURL(url, res.getData(), contentType, ENCODE, null);
+                        loadBaseUrlNative(view, url, res.getData(), contentType);
                     }else{
-                        urlsVerified.add(url);
-                        view.loadUrl(url);
+                        loadUrlNative(view, url);
                     }
                 }catch(Exception e){
-                    urlsVerified.add(url);
-                    view.loadUrl(url);
+                    loadUrlNative(view, url);
                     e.printStackTrace();
                 }finally{
                     if(res != null){
@@ -115,9 +102,25 @@ public class WebViewCreaClient extends WebViewClient{
 
     public void loadUrl(WebView view, String url){
         if(!uniShouldOverrideUrlLoading(view, url)){
-            urlsVerified.add(url);
             view.loadUrl(url);
         }
+    }
+    private void loadUrlNative(final WebView view, final String url){
+        view.post(new Runnable(){
+            @Override
+            public void run(){
+                view.loadUrl(url);
+            }
+        });
+    }
+
+    private void loadBaseUrlNative(final WebView view, final String url, final String data, final String mimetype){
+        view.post(new Runnable(){
+            @Override
+            public void run(){
+                view.loadDataWithBaseURL(url, data, mimetype, ENCODE, null);
+            }
+        });
     }
 
     public NetClient getNetClient(){
@@ -143,7 +146,7 @@ public class WebViewCreaClient extends WebViewClient{
                 res.close();
             }
         }
-        view.loadDataWithBaseURL(url, data, MIMETYPE_HTML, ENCODE, null);
+        loadBaseUrlNative(view, url, data, MIMETYPE_HTML);
     }
     private String insertTagWebView(String data, String url){
         url = url.replace("\"", "&quot;");
@@ -171,10 +174,9 @@ public class WebViewCreaClient extends WebViewClient{
                 return;
             }
             url = urlsPassed[2]+":"+data;
-            urlsVerified.add(url);
-            view.loadUrl(url);
+            loadUrlNative(view, url);
         }else{
-            view.loadDataWithBaseURL(url, data, MIMETYPE_JS, ENCODE, null);
+            loadBaseUrlNative(view, url, data, MIMETYPE_JS);
         }
     }
     private static void evalJsKK(final WebView view, final String code){
@@ -196,19 +198,35 @@ public class WebViewCreaClient extends WebViewClient{
                 res.close();
             }
         }
-        view.loadDataWithBaseURL(url, data, MIMETYPE_CSS, ENCODE, null);
+        loadBaseUrlNative(view, url, data, MIMETYPE_CSS);
     }
-    public String getUserAgent(WebView view, UserAgentsIds userAgentId) throws Exception{
-        String userStr = userAgentId.toString();
-        NetRes res = null;
-        try{
-            res = client.post(PROXY_GET_USERAGENT, view.getSettings().getUserAgentString(), desktop, userStr);
-            return res.getData();
-        }finally{
-            if(res != null){
-                res.close();
+    public String getUserAgent(final WebView view, final UserAgentsIds userAgentId){
+        final CountDownLatch latch = new CountDownLatch(1);
+        final String[] result = new String[1];
+        background.execute(new Runnable(){
+            @Override
+            public void run(){
+                NetRes res = null;
+                try{
+                    String userStr = userAgentId.toString();
+                    res = client.post(PROXY_GET_USERAGENT, view.getSettings().getUserAgentString(), desktop, userStr);
+                    result[0] = res.getData();
+                }catch(Exception e){
+                    result[0] = view.getSettings().getUserAgentString();
+                }finally{
+                    latch.countDown();
+                    if(res != null){
+                        res.close();
+                    }
+                }
             }
+        });
+        try {
+            latch.await(); 
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
+        return result[0];
     }
     public void evaluateJavascript(final WebView view, final String code){
         background.execute(new Runnable(){
