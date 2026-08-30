@@ -1,5 +1,4 @@
-/**
- * Copyright (c) 2014-present, Facebook, Inc.
+export default `/** * Copyright (c) 2014-present, Facebook, Inc.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -147,9 +146,9 @@ var runtime = (function (exports) {
       return genFun;
     };
   
-    // Within the body of any async function, `await x` is transformed to
-    // `yield regeneratorRuntime.awrap(x)`, so that the runtime can test
-    // `hasOwn.call(value, "__await")` to determine if the yielded value is
+    // Within the body of any async function, 'await x' is transformed to
+    // 'yield regeneratorRuntime.awrap(x)', so that the runtime can test
+    // 'hasOwn.call(value, "__await")' to determine if the yielded value is
     // meant to be awaited.
     exports.awrap = function(arg) {
       return { __await: arg };
@@ -729,7 +728,7 @@ var runtime = (function (exports) {
     // Regardless of whether this script is executing as a CommonJS module
     // or not, return the runtime object so that we can declare the variable
     // regeneratorRuntime in the outer scope, which allows this module to be
-    // injected easily by `bin/regenerator --include-runtime script.js`.
+    // injected easily by 'bin/regenerator --include-runtime script.js'.
     return exports;
   
   }(
@@ -759,3 +758,4 @@ var runtime = (function (exports) {
       Function("r", "regeneratorRuntime = r")(runtime);
     }
   }
+`;
