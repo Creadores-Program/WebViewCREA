@@ -67,9 +67,9 @@ export default async function patchCss(css, sourceUrl, headers){
     }));
   }
   plugins.push(cssnano({
-    preset: 'default',
-    autoprefixer: false, 
-    discardUnused: false
+    preset: ['default', {
+      autoprefixer: false, 
+      discardUnused: false }]
   }));
   const result = await postcss(plugins).process(css, { from: undefined });
   return result.css;
