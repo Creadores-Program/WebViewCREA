@@ -28,7 +28,8 @@ public class NetClient {
         conn.setDoOutput(true);
         conn.setRequestProperty("Content-Type", "text/html; charset=utf-8");
         conn.setRequestProperty("Content-Encoding", "gzip");
-        
+        conn.setRequestProperty("Accept-Encoding", "gzip");
+
         setCommonHeaders(conn, userAgent, isDesktop, cookie);
 
         byte[] compressedData = compressGzip(data);
@@ -58,6 +59,7 @@ public class NetClient {
         conn.setReadTimeout(TIMEOUT_MS);
         
         conn.setRequestMethod("GET");
+        conn.setRequestProperty("Accept-Encoding", "gzip");
         setCommonHeaders(conn, userAgent, isDesktop, cookie);
 
         return new NetRes(conn);
