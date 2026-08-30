@@ -1,4 +1,4 @@
-(function () {
+export default `(function () {
     if (typeof window.CustomEvent === "function") return false;
   
     function CustomEvent(event, params) {
@@ -28,4 +28,4 @@ if (!String.prototype.endsWith) {
     }
     return subjectString.slice(start, endPosition) === searchStr;
   };
-}
+}`;
