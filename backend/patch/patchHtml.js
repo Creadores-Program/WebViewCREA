@@ -88,38 +88,13 @@ export default async function patchHtml(html, headers) {
       }
     }
   });
-  let cssCounter = 0;
   $('link[rel="stylesheet"]').each((_, elem) => {
     const $link = $(elem);
-    const rawUrl = $link.attr('href') || $link.attr('src');
-    if (!rawUrl) return;
-
-    cssCounter++;
-    const styleId = 'patch-css-' + cssCounter;
-    const targetUrl = resolveUrl(rawUrl, baseUrl);
-
-    const clientScript = `(function(){` +
-      `var xhr = new XMLHttpRequest();` +
-      `xhr.open('GET', 'https://webviewcrea.vercel.app/api/patchCSS', true);` +
-      `xhr.setRequestHeader('target-url', ${JSON.stringify(targetUrl)});` +
-      `xhr.onreadystatechange = function(){` +
-        `if(xhr.readyState === 4 && xhr.status === 200){` +
-          `var el = document.getElementById(${JSON.stringify(styleId)});` +
-          `if(el){` +
-            `try { el.innerHTML = xhr.responseText; }` +
-            `catch(e){` +
-              `if(el.styleSheet){ el.styleSheet.cssText = xhr.responseText; }` +
-            `}` +
-          `}` +
-        `}` +
-      `};` +
-      `xhr.send();` +
-    `})();`;
-
-    $link.replaceWith(
-      `<style id="${styleId}" type="text/css"></style>` +
-      `<script type="text/javascript">${clientScript}</script>`
-    );
+    const url = $link.attr('href') || $link.attr('src');
+    const promise = patchCss(null, resolveUrl(url, baseUrl), headers).then((patchedCss) => {
+      $link.replaceWith('<style type="text/css">/n'+patchedCss+"/n</style>");
+    });
+    stylePromises.push(promise);
   });
   $('[style]').each((_, elem) => {
     const $elem = $(elem);
