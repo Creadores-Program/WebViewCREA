@@ -4,7 +4,6 @@ const nextConfig = {
   },
   experimental: {
     optimizePackageImports: ['lucide-react', 'lodash-es']
-    }
   }
 };
 
