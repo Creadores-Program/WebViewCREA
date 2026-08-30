@@ -1,12 +1,10 @@
 package org.CreadoresProgram.WebViewCREA.network;
 
-import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Locale;
-import java.util.zip.GZIPOutputStream;
 
 public class NetClient {
 
@@ -27,18 +25,14 @@ public class NetClient {
         conn.setRequestMethod("POST");
         conn.setDoOutput(true);
         conn.setRequestProperty("Content-Type", "text/html; charset=utf-8");
-        conn.setRequestProperty("Content-Encoding", "gzip");
-        conn.setRequestProperty("Accept-Encoding", "gzip");
-
         setCommonHeaders(conn, userAgent, isDesktop, cookie);
 
-        byte[] compressedData = compressGzip(data);
-
-        conn.setFixedLengthStreamingMode(compressedData.length);
         OutputStream os = null;
         try {
+            byte[] input = data.getBytes("UTF-8");
+            conn.setFixedLengthStreamingMode(input.length);
             os = conn.getOutputStream();
-            os.write(compressedData, 0, compressedData.length);
+            os.write(input, 0, input.length);
             os.flush();
         } finally {
             if (os != null) {
@@ -59,22 +53,9 @@ public class NetClient {
         conn.setReadTimeout(TIMEOUT_MS);
         
         conn.setRequestMethod("GET");
-        conn.setRequestProperty("Accept-Encoding", "gzip");
         setCommonHeaders(conn, userAgent, isDesktop, cookie);
 
         return new NetRes(conn);
-    }
-
-    private byte[] compressGzip(String data) throws IOException {
-        if (data == null || data.length() == 0) {
-            return new byte[0];
-        }
-        ByteArrayOutputStream obj = new ByteArrayOutputStream();
-        GZIPOutputStream gzip = new GZIPOutputStream(obj);
-        gzip.write(data.getBytes("UTF-8"));
-        gzip.flush();
-        gzip.close();
-        return obj.toByteArray();
     }
 
     private void setCommonHeaders(HttpURLConnection conn, String userAgent, boolean isDesktop, String cookie) {
@@ -90,7 +71,7 @@ public class NetClient {
         conn.setRequestProperty("Upgrade-Insecure-Requests", "1");
         conn.setRequestProperty("Connection", "keep-alive");
         conn.setRequestProperty("Keep-Alive", "timeout=60, max=100");
-        if (cookie != null && cookie.trim().length() > 0) {
+        if(cookie != null && cookie.trim().length() > 0){
             conn.setRequestProperty("Cookie", cookie);
         }
     }
