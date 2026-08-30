@@ -3,9 +3,9 @@ import patchCss from './patchCss.js';
 import patchJs from './patchJs.js';
 import userAgent from '../utils/UserAgent.js';
 import { minify } from 'html-minifier-terser';
-import urlPolyfill from '../polyfills/url-polyfill.js?raw';
-import customEventPoly from '../polyfills/customEventPoly.js?raw';
-import runtime from '../polyfills/runtime.js?raw';
+import urlPolyfill from '../polyfills/url-polyfill.js.raw';
+import customEventPoly from '../polyfills/customEventPoly.js.raw';
+import runtime from '../polyfills/runtime.js.raw';
 
 const POLYFILLS = [
   customEventPoly,
