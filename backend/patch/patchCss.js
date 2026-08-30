@@ -50,7 +50,6 @@ export default async function patchCss(css, sourceUrl, headers){
         cascade: false
       },
       features: {
-        'pseudo-elements-single-colon': true,
         'custom-properties': { preserve: false },
         'nesting-rules': true,
         'hexadecimal-alpha-notation': true,
@@ -69,7 +68,10 @@ export default async function patchCss(css, sourceUrl, headers){
   plugins.push(cssnano({
     preset: ['default', {
       autoprefixer: false, 
-      discardUnused: false }]
+      normalizePseudos: false,
+      convertValues: false,
+      discardUnused: false
+    }]
   }));
   const result = await postcss(plugins).process(css, { from: undefined });
   return result.css;
