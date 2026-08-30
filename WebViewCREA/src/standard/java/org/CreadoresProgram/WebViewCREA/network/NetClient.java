@@ -56,7 +56,7 @@ public class NetClient {
   private static final String lang = Locale.getDefault().getLanguage();
   private MediaType mediaType = MediaType.parse("text/html; charset=utf-8");
 
-  private RequestBody gzipRequestBody(final RequestBody body) {
+  private RequestBody forceGzipRequestBody(final RequestBody body) {
     return new RequestBody() {
       @Override
       public MediaType contentType() {
@@ -79,7 +79,7 @@ public class NetClient {
 
   public NetRes post(String url, String userAgent, boolean isDesktop, String data, String cookie) throws IOException {
     RequestBody rawBody = RequestBody.create(mediaType, data);
-    RequestBody gzippedBody = gzipRequestBody(rawBody);
+    RequestBody gzippedBody = forceGzipRequestBody(rawBody);
 
     Request req = new Request.Builder()
       .url(url)
