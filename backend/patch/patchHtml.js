@@ -77,6 +77,7 @@ export default async function patchHtml(html, headers) {
       }
     }
   });
+  let cssCounter = 0;
   $('link[rel="stylesheet"]').each((_, elem) => {
     const $link = $(elem);
     const rawUrl = $link.attr('href') || $link.attr('src');
