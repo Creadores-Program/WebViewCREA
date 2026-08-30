@@ -40,6 +40,8 @@ export default async function patchHtml(html, headers) {
   headers = { ...headers };
   delete headers["Connection"];
   delete headers["Keep-Alive"];
+  delete headers["connection"];
+  delete headers["keep-alive"];
   const $ = cheerio.load(html, { decodeEntities: false });
   const baseUrl = $('webviewcrea')?.attr('baseurl');
   const baseHost = new URL(baseUrl).hostname;
