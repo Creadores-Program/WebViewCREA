@@ -104,6 +104,7 @@ function legacyDomApiPlugin({ types: t }) {
               )
             )
           );
+          path.skip();
           return;
         }
 
@@ -143,6 +144,7 @@ function legacyDomApiPlugin({ types: t }) {
               )
             )
           );
+          path.skip();
           return;
         }
 
@@ -168,6 +170,7 @@ function legacyDomApiPlugin({ types: t }) {
               )
             )
           );
+          path.skip();
           return;
         }
       },
@@ -182,6 +185,7 @@ function legacyDomApiPlugin({ types: t }) {
           path.replaceWithSourceString(
             "(typeof window !== 'undefined' && window.console ? window.console : { log: function(){}, error: function(){}, warn: function(){} })"
           );
+          path.skip();
         }
       }
     }
