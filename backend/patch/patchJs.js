@@ -2,6 +2,74 @@ import babel from '@babel/core';
 import presetEnv from '@babel/preset-env';
 import { minify } from 'terser';
 
+function legacyDomApiPlugin({ types: t }) {
+  return {
+    visitor: {
+      CallExpression(path) {
+        const { callee, arguments: args } = path.node;
+
+        if (
+          t.isMemberExpression(callee) &&
+          t.isIdentifier(callee.property, { name: 'setProperty' }) &&
+          t.isMemberExpression(callee.object) &&
+          t.isIdentifier(callee.object.property, { name: 'style' })
+        ) {
+          const targetElementStyle = callee.object;
+          const propName = args[0];
+          const propValue = args[1];
+
+          path.replaceWith(
+            t.assignmentExpression(
+              '=',
+              t.memberExpression(targetElementStyle, propName, true),
+              propValue
+            )
+          );
+          return;
+        }
+
+        if (
+          t.isMemberExpression(callee) &&
+          t.isIdentifier(callee.property, { name: 'removeProperty' }) &&
+          t.isMemberExpression(callee.object) &&
+          t.isIdentifier(callee.object.property, { name: 'style' })
+        ) {
+          const targetElementStyle = callee.object;
+          const propName = args[0];
+
+          path.replaceWith(
+            t.assignmentExpression(
+              '=',
+              t.memberExpression(targetElementStyle, propName, true),
+              t.stringLiteral('')
+            )
+          );
+          return;
+        }
+
+        if (
+          t.isMemberExpression(callee) &&
+          t.isIdentifier(callee.property, { name: 'add' }) &&
+          t.isMemberExpression(callee.object) &&
+          t.isIdentifier(callee.object.property, { name: 'classList' })
+        ) {
+          const element = callee.object.object;
+          const className = args[0];
+
+          path.replaceWith(
+            t.assignmentExpression(
+              '+=',
+              t.memberExpression(element, t.identifier('className')),
+              t.binaryExpression('+', t.stringLiteral(' '), className)
+            )
+          );
+          return;
+        }
+      }
+    }
+  };
+}
+
 function es5SyncRemoteProxyPlugin({ types: t }, options) {
   const { mapImport = {}, scriptUrl = '' } = options;
   const PROXY_ENDPOINT = 'https://webviewcrea.vercel.app/api/patchJS';
@@ -24,27 +92,31 @@ function es5SyncRemoteProxyPlugin({ types: t }, options) {
 
         let polyfillCode = `
           (function() {
+            if (typeof window === 'undefined') { window = this; }
             var targetUrl = '${targetUrl}';
             var proxyUrl = '${PROXY_ENDPOINT}';
             
             var xhrGet = new (window.XMLHttpRequest || ActiveXObject)('MSXML2.XMLHTTP.3.0');
             xhrGet.open('GET', targetUrl, false);
-            xhrGet.send(null);
+            try { xhrGet.send(null); } catch(e) {}
             
             if (xhrGet.status >= 200 && xhrGet.status < 300) {
               var rawJs = xhrGet.responseText;
               
-              var xhrPost = new XMLHttpRequest();
+              var xhrPost = new (window.XMLHttpRequest || ActiveXObject)('MSXML2.XMLHTTP.3.0');
               xhrPost.open('POST', proxyUrl, false);
-              xhrPost.setRequestHeader('Content-Type', 'text/javascript');
-              xhrPost.send(rawJs);
+              try {
+                xhrPost.setRequestHeader('Content-Type', 'text/javascript');
+                xhrPost.send(rawJs);
+              } catch(e) {}
               
               if (xhrPost.status >= 200 && xhrPost.status < 300) {
                 var patchedCode = xhrPost.responseText;
                 var module = { exports: {} };
                 var exports = module.exports;
                 
-                (new Function('module', 'exports', patchedCode))(module, exports);
+                var execFn = new Function('module', 'exports', patchedCode);
+                execFn(module, exports);
         `;
 
         specifiers.forEach(spec => {
@@ -84,7 +156,6 @@ export default async function patchJs(jscode, mapImport = {}, config = {}) {
 
   const result = await babel.transformAsync(jscode, {
     compact: isInline,
-    minified: isInline,
     comments: false,
     parserOpts: {
       allowReturnOutsideFunction: isInline,
@@ -102,6 +173,7 @@ export default async function patchJs(jscode, mapImport = {}, config = {}) {
       ]
     ],
     plugins: [
+      legacyDomApiPlugin,
       [es5SyncRemoteProxyPlugin, { mapImport, scriptUrl }]
     ],
     configFile: false,
@@ -120,9 +192,7 @@ export default async function patchJs(jscode, mapImport = {}, config = {}) {
         warnings: false,
         comparisons: false,
         inline: 2,
-        keep_infinity: true,
-        drop_debugger: true,
-        drop_console: false
+        keep_infinity: true
       },
       mangle: {
         ie8: true
