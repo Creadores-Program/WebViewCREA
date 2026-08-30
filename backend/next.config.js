@@ -4,15 +4,15 @@ const nextConfig = {
   },
   experimental: {
     optimizePackageImports: ['lucide-react', 'lodash-es'],
-  },
-  webpack: (config) => {
-    config.module.rules.push({
-      test: /\.js$/,
-      include: /polyfills/,
-      type: 'asset/source',
-    });
-    return config;
-  },
+    turbo: {
+      rules: {
+        'polyfills/*.js': {
+          loaders: ['raw-loader'],
+          as: '*.js'
+        }
+      }
+    }
+  }
 };
 
 module.exports = nextConfig;
