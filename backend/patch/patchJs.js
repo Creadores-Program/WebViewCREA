@@ -14,15 +14,11 @@ function legacyDomApiPlugin({ types: t }) {
           t.isMemberExpression(callee.object) &&
           t.isIdentifier(callee.object.property, { name: 'style' })
         ) {
-          const targetElementStyle = callee.object;
-          const propName = args[0];
-          const propValue = args[1];
-
           path.replaceWith(
             t.assignmentExpression(
               '=',
-              t.memberExpression(targetElementStyle, propName, true),
-              propValue
+              t.memberExpression(callee.object, args[0], true),
+              args[1]
             )
           );
           return;
@@ -34,13 +30,10 @@ function legacyDomApiPlugin({ types: t }) {
           t.isMemberExpression(callee.object) &&
           t.isIdentifier(callee.object.property, { name: 'style' })
         ) {
-          const targetElementStyle = callee.object;
-          const propName = args[0];
-
           path.replaceWith(
             t.assignmentExpression(
               '=',
-              t.memberExpression(targetElementStyle, propName, true),
+              t.memberExpression(callee.object, args[0], true),
               t.stringLiteral('')
             )
           );
@@ -54,16 +47,141 @@ function legacyDomApiPlugin({ types: t }) {
           t.isIdentifier(callee.object.property, { name: 'classList' })
         ) {
           const element = callee.object.object;
-          const className = args[0];
-
           path.replaceWith(
             t.assignmentExpression(
               '+=',
               t.memberExpression(element, t.identifier('className')),
-              t.binaryExpression('+', t.stringLiteral(' '), className)
+              t.binaryExpression('+', t.stringLiteral(' '), args[0])
             )
           );
           return;
+        }
+
+        if (
+          t.isMemberExpression(callee) &&
+          t.isIdentifier(callee.property, { name: 'remove' }) &&
+          t.isMemberExpression(callee.object) &&
+          t.isIdentifier(callee.object.property, { name: 'classList' })
+        ) {
+          const element = callee.object.object;
+          const classNameProp = t.memberExpression(element, t.identifier('className'));
+          path.replaceWith(
+            t.assignmentExpression(
+              '=',
+              classNameProp,
+              t.callExpression(
+                t.memberExpression(classNameProp, t.identifier('replace')),
+                [args[0], t.stringLiteral('')]
+              )
+            )
+          );
+          return;
+        }
+
+        if (
+          t.isMemberExpression(callee) &&
+          t.isIdentifier(callee.property, { name: 'addEventListener' })
+        ) {
+          const element = callee.object;
+          const eventName = args[0];
+          const handler = args[1];
+
+          let legacyEvent = t.binaryExpression('+', t.stringLiteral('on'), eventName);
+          if (t.isStringLiteral(eventName)) {
+            legacyEvent = t.stringLiteral('on' + eventName.value);
+          }
+
+          path.replaceWith(
+            t.conditionalExpression(
+              t.memberExpression(element, t.identifier('addEventListener')),
+              t.callExpression(
+                t.memberExpression(element, t.identifier('addEventListener')),
+                [eventName, handler]
+              ),
+              t.callExpression(
+                t.memberExpression(element, t.identifier('attachEvent')),
+                [legacyEvent, handler]
+              )
+            )
+          );
+          return;
+        }
+
+        if (
+          t.isMemberExpression(callee) &&
+          t.isIdentifier(callee.property, { name: 'querySelector' }) &&
+          args.length > 0 &&
+          t.isStringLiteral(args[0])
+        ) {
+          const query = args[0].value;
+          if (query.startsWith('#') && !/[ .\s[\]]/.test(query.slice(1))) {
+            path.replaceWith(
+              t.callExpression(
+                t.memberExpression(callee.object, t.identifier('getElementById')),
+                [t.stringLiteral(query.slice(1))]
+              )
+            );
+            return;
+          }
+        }
+      },
+
+      MemberExpression(path) {
+        if (
+          t.isIdentifier(path.node.object, { name: 'navigator' }) &&
+          t.isIdentifier(path.node.property, { name: 'language' }) &&
+          !path.parentPath.isLogicalExpression()
+        ) {
+          path.replaceWith(
+            t.logicalExpression(
+              '||',
+              path.node,
+              t.logicalExpression(
+                '||',
+                t.memberExpression(t.identifier('navigator'), t.identifier('userLanguage')),
+                t.stringLiteral('en')
+              )
+            )
+          );
+          return;
+        }
+
+        if (
+          t.isIdentifier(path.node.object, { name: 'window' }) &&
+          t.isIdentifier(path.node.property, { name: 'innerWidth' }) &&
+          !path.parentPath.isLogicalExpression()
+        ) {
+          path.replaceWith(
+            t.logicalExpression(
+              '||',
+              path.node,
+              t.logicalExpression(
+                '||',
+                t.memberExpression(
+                  t.memberExpression(t.identifier('document'), t.identifier('documentElement')),
+                  t.identifier('clientWidth')
+                ),
+                t.memberExpression(
+                  t.memberExpression(t.identifier('document'), t.identifier('body')),
+                  t.identifier('clientWidth')
+                )
+              )
+            )
+          );
+          return;
+        }
+      },
+
+      Identifier(path) {
+        if (
+          path.node.name === 'console' &&
+          path.parentPath.isMemberExpression() &&
+          path.parentPath.node.object === path.node &&
+          !path.scope.hasBinding('console')
+        ) {
+          path.replaceWithSourceString(
+            "(typeof window !== 'undefined' && window.console ? window.console : { log: function(){}, error: function(){}, warn: function(){} })"
+          );
         }
       }
     }
@@ -210,7 +328,7 @@ export default async function patchJs(jscode, mapImport = {}, config = {}) {
       code = minified.code;
     }
   } catch (err) {
-    console.error("Error minificando con Terser:", err);
+    console.error("Error Terser:", err);
   }
 
   if (isInline) {
