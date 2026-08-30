@@ -209,7 +209,7 @@ export default async function patchHtml(html, headers) {
       }
     }
   });
-  await Promise.all([...stylePromises, ...scriptPromises, ...eventPromises]);
+  await Promise.allSettled([...stylePromises, ...scriptPromises, ...eventPromises]);
   let rawHtml = $.html();
   try {
     const minifiedHtml = await minify(rawHtml, {
