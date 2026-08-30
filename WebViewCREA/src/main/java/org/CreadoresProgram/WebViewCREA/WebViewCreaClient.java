@@ -112,6 +112,13 @@ public class WebViewCreaClient extends WebViewClient{
             view.loadUrl(url);
         }
     }
+    public void reload(WebView view){
+        if(view.getUrl() != null){
+            loadUrl(view, view.getUrl());
+        }else{
+            view.reload();
+        }
+    }
     private void loadUrlNative(final WebView view, final String url){
         view.post(new Runnable(){
             @Override
@@ -242,6 +249,22 @@ public class WebViewCreaClient extends WebViewClient{
                 patchJs(view, code, code, true, true, userAgent, null);
             }
         });
+    }
+    public enum LocalUserAgents{
+        LEGACY_CHROME("Mozilla/5.0 (Linux; Android 4.4.2; Nexus 5 Build/KOT49H) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/30.0.0.0 Mobile Safari/537.36"),//Chrome 30
+        LEGACY_WEBKIT("Mozilla/5.0 (Linux; U; Android 4.3; es-es; Galaxy Nexus Build/JWR66Y) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.30"),//Webkit 534
+        CHROME_M("Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2564.95 Mobile Safari/537.36"),//Chrome 48
+        CHROME_K("Mozilla/5.0 (Linux; Android 10; SM-G960F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Mobile Safari/537.36"),//Chrome 80
+        CHROME_MODERN("Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36");//Chrome 124
+
+        private final String userAgent;
+        LocalUserAgents(String userAgent){
+            this.userAgent = userAgent;
+        }
+        @Override
+        public String toString() {
+            return this.userAgent;
+        }
     }
     public enum UserAgentsIds{
         DEFAULT("default"),//Chrome Mobile 151+ (Android 10)
