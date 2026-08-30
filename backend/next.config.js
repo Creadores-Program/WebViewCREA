@@ -1,5 +1,4 @@
-module.exports = {
-  swcMinify: true,
+const nextConfig = {
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
   },
@@ -7,3 +6,5 @@ module.exports = {
     optimizePackageImports: ['lucide-react', 'lodash-es'],
   },
 };
+
+module.exports = nextConfig;
