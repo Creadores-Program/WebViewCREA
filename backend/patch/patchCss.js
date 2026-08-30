@@ -21,6 +21,8 @@ export default async function patchCss(css, sourceUrl, headers){
   headers = { ...headers };
   delete headers["Connection"];
   delete headers["Keep-Alive"];
+  delete headers["connection"];
+  delete headers["keep-alive"]
   if(sourceUrl && !css){
     const baseHost = new URL(sourceUrl).hostname;
     let request = await fetch(sourceUrl, {
