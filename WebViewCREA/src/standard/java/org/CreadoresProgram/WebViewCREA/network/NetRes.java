@@ -2,6 +2,9 @@ package org.CreadoresProgram.WebViewCREA.network;
 
 import okhttp3.Response;
 import okhttp3.Headers;
+import okio.BufferedSource;
+import okio.GzipSource;
+import okio.Okio;
 
 import java.io.IOException;
 import java.util.Map;
@@ -31,10 +34,24 @@ public class NetRes {
     }
     return headersMap;
   }
+
   public String getData() throws IOException {
+    if (response.body() == null) {
+      return "";
+    }
+
+    String encoding = response.header("Content-Encoding");
+    if (encoding != null && encoding.toLowerCase().contains("gzip")) {
+      BufferedSource gzipSource = Okio.buffer(new GzipSource(response.body().source()));
+      return gzipSource.readUtf8();
+    }
+
     return response.body().string();
   }
+
   public void close(){
-    response.close();
+    if (response != null) {
+      response.close();
+    }
   }
 }
