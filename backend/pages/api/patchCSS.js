@@ -13,7 +13,7 @@ export default async function handler(req, res) {
   res.setHeader('Content-Type', 'text/css; charset=utf-8');
   try{
     const data = req.body;
-    const codePatch = await patchCss(data, null, req.headers);
+    const codePatch = await patchCss(data, req.headers['target-url'], req.headers);
     res.status(200).send(codePatch);
   }catch(err){
     console.error(err);
