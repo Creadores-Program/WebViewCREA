@@ -3,7 +3,6 @@ import postcssPresetEnv from 'postcss-preset-env';
 import postcssImport from 'postcss-import';
 import postcssUrl from 'postcss-url';
 import autoprefixer from 'autoprefixer';
-import pixrem from 'postcss-pixrem';
 import cssnano from 'cssnano';
 import userAgent from '../utils/UserAgent.js';
 
@@ -59,8 +58,7 @@ export default async function patchCss(css, sourceUrl, headers){
         'color-functional-notation': true,
         'gap-properties': true
       }
-    }),
-    pixrem({ rootValue: 16, replace: false })
+    })
   ];
   if(sourceUrl){
     plugins.push(postcssUrl({
