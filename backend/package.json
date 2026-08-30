@@ -29,7 +29,6 @@
     "postcss-preset-env": "^10.0.0",
     "postcss-import": "^16.1.0",
     "postcss-url": "^10.1.3",
-    "postcss-pixrem": "^0.1.0",
     "whatwg-fetch": "^3.6.20",
     "next": "latest",
     "react": "latest",
