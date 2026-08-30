@@ -3,6 +3,9 @@ import postcssPresetEnv from 'postcss-preset-env';
 import postcssImport from 'postcss-import';
 import postcssUrl from 'postcss-url';
 import autoprefixer from 'autoprefixer';
+import colorRgbaFallback from 'postcss-color-rgba-fallback';
+import pixrem from 'postcss-pixrem';
+import cssnano from 'cssnano';
 import userAgent from '../utils/UserAgent.js';
 
 const singleColonPlugin = () => {
@@ -46,13 +49,20 @@ export default async function patchCss(css, sourceUrl, headers){
         "android >= 2.1"
       ],
       autoprefixer: {
-        grid: 'autoplace'
+        grid: 'autoplace',
+        cascade: false
       },
       features: {
         'pseudo-elements-single-colon': true,
-        'custom-properties': { preserve: false }
+        'custom-properties': { preserve: false },
+        'nesting-rules': true,
+        'hexadecimal-alpha-notation': true,
+        'color-functional-notation': true,
+        'gap-properties': true
       }
-    })
+    }),
+    pixrem({ rootValue: 16, replace: false }),
+    colorRgbaFallback({ oldie: true })
   ];
   if(sourceUrl){
     plugins.push(postcssUrl({
@@ -60,6 +70,9 @@ export default async function patchCss(css, sourceUrl, headers){
       baseUrl: sourceUrl
     }));
   }
+  plugins.push(cssnano({
+    preset: 'default',
+  }));
   const result = await postcss(plugins).process(css, { from: undefined });
   return result.css;
 }
