@@ -21,10 +21,11 @@ public class NetClient {
         
         conn.setConnectTimeout(TIMEOUT_MS);
         conn.setReadTimeout(TIMEOUT_MS);
+        conn.setInstanceFollowRedirects(true);
         
         conn.setRequestMethod("POST");
         conn.setDoOutput(true);
-        conn.setRequestProperty("Content-Type", "text/html; charset=utf-8");
+        conn.setRequestProperty("Content-Type", "text/plain; charset=utf-8");
         setCommonHeaders(conn, userAgent, isDesktop, cookie);
 
         OutputStream os = null;
@@ -51,6 +52,8 @@ public class NetClient {
         
         conn.setConnectTimeout(TIMEOUT_MS);
         conn.setReadTimeout(TIMEOUT_MS);
+
+        conn.setInstanceFollowRedirects(true);
         
         conn.setRequestMethod("GET");
         setCommonHeaders(conn, userAgent, isDesktop, cookie);
