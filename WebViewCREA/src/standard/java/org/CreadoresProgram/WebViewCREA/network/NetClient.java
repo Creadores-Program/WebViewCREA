@@ -58,7 +58,7 @@ public class NetClient{
     .build();
 
   private static final String lang = Locale.getDefault().getLanguage();
-  private MediaType mediaType = MediaType.parse("text/html; charset=utf-8");
+  private MediaType mediaType = MediaType.parse("text/plain; charset=utf-8");
 
   public NetRes post(String url, String userAgent, boolean isDesktop, String data, String cookie) throws IOException{
     RequestBody body = RequestBody.create(mediaType, data);
