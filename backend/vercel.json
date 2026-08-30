@@ -13,40 +13,11 @@
         "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Methods": "POST, OPTIONS",
         "Access-Control-Allow-Headers": "Content-Type, target-url",
-        "Vary": "target-url, Accept, Content-Type"
+        "Vary": "target-url, Accept, Content-Type",
+        "Cache-Control": "public, max-age=864000, s-maxage=864000, stale-while-revalidate=86400",
+        "Connection": "keep-alive",
+        "Keep-Alive": "timeout=60, max=100"
       }
     }
-  ],
-  "headers": [{
-    "source": "/api/(.*)",
-    "headers": [
-    {
-      "key": "Cache-Control",
-      "value": "public, max-age=864000, s-maxage=864000, stale-while-revalidate=86400"
-    },
-    {
-      "key": "Connection",
-      "value": "keep-alive"
-    },
-    {
-      "key": "Keep-Alive",
-      "value": "timeout=60, max=100"
-    },
-    {
-      "key": "Access-Control-Allow-Origin",
-      "value": "*"
-    },
-    {
-      "key": "Access-Control-Allow-Methods",
-      "value": "POST, OPTIONS"
-    },
-    {
-      "key": "Access-Control-Allow-Headers",
-      "value": "Content-Type"
-    },
-    {
-      "key": "Vary",
-      "value": "target-url, Accept, Content-Type"
-    }]
-  }]
+  ]
 }
