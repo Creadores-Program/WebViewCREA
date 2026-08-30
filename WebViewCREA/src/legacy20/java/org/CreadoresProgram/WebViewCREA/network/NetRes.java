@@ -8,6 +8,8 @@ import java.net.HttpURLConnection;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.List;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.InflaterInputStream;
 
 public class NetRes {
     private HttpURLConnection connection;
@@ -39,19 +41,37 @@ public class NetRes {
         return connection.getResponseCode();
     }
 
+    private InputStream getDecompressedStream(InputStream is) throws IOException {
+        if (is == null) return null;
+        
+        String encoding = connection.getContentEncoding();
+        if (encoding != null) {
+            encoding = encoding.toLowerCase().trim();
+            if (encoding.contains("gzip")) {
+                return new GZIPInputStream(is);
+            } else if (encoding.contains("deflate")) {
+                return new InflaterInputStream(is);
+            }
+        }
+        return is;
+    }
+
     public String getData() throws IOException {
+        InputStream rawStream = null;
         InputStream is = null;
         try {
             int responseCode = connection.getResponseCode();
             if (responseCode >= 400) {
-                is = connection.getErrorStream();
+                rawStream = connection.getErrorStream();
             } else {
-                is = connection.getInputStream();
+                rawStream = connection.getInputStream();
             }
 
-            if (is == null) {
+            if (rawStream == null) {
                 return "";
             }
+
+            is = getDecompressedStream(rawStream);
 
             BufferedReader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
             StringBuilder sb = new StringBuilder();
@@ -66,6 +86,11 @@ public class NetRes {
                     is.close();
                 } catch (IOException e) {
                 }
+            } else if (rawStream != null) {
+                try {
+                    rawStream.close();
+                } catch (IOException e) {
+                }
             }
         }
     }
@@ -73,11 +98,12 @@ public class NetRes {
     public void close() {
         if (connection == null) return;
         try {
-            InputStream is = connection.getResponseCode() >= 400 
+            InputStream rawStream = connection.getResponseCode() >= 400 
                     ? connection.getErrorStream() 
                     : connection.getInputStream();
 
-            if (is != null) {
+            if (rawStream != null) {
+                InputStream is = getDecompressedStream(rawStream);
                 byte[] buffer = new byte[1024];
                 while (is.read(buffer) != -1) {
                 }
