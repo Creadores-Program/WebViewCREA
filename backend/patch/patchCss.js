@@ -3,7 +3,6 @@ import postcssPresetEnv from 'postcss-preset-env';
 import postcssImport from 'postcss-import';
 import postcssUrl from 'postcss-url';
 import autoprefixer from 'autoprefixer';
-import colorRgbaFallback from 'postcss-color-rgba-fallback';
 import pixrem from 'postcss-pixrem';
 import cssnano from 'cssnano';
 import userAgent from '../utils/UserAgent.js';
@@ -61,8 +60,7 @@ export default async function patchCss(css, sourceUrl, headers){
         'gap-properties': true
       }
     }),
-    pixrem({ rootValue: 16, replace: false }),
-    colorRgbaFallback({ oldie: true })
+    pixrem({ rootValue: 16, replace: false })
   ];
   if(sourceUrl){
     plugins.push(postcssUrl({
