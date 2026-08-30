@@ -5,6 +5,17 @@
       "use": "@vercel/next"
     }
   ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/$1",
+      "headers": {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "POST, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type, target-url"
+      }
+    }
+  ],
   "headers": [{
     "source": "/api/(.*)",
     "headers": [
@@ -36,11 +47,5 @@
       "key": "Vary",
       "value": "target-url, Accept, Content-Type"
     }]
-  }],
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "/api/$1"
-    }
-  ]
+  }]
 }
