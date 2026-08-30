@@ -6,6 +6,42 @@
       "use": "@vercel/next"
     }
   ],
+  "headers": [
+    {
+      "key": "Cache-Control",
+      "value": "public, max-age=864000, s-maxage=864000, stale-while-revalidate=86400"
+    },
+    {
+      "key": "Connection",
+      "value": "keep-alive"
+    },
+    {
+      "key": "Keep-Alive",
+      "value": "timeout=60, max=100"
+    },
+    {
+      "key": "Access-Control-Allow-Origin",
+      "value": "*"
+    },
+    {
+      "key": "Access-Control-Allow-Methods",
+      "value": "POST, OPTIONS"
+    },
+    {
+      "key": "Access-Control-Allow-Headers",
+      "value": "Content-Type"
+    },
+    {
+      "key": "Vary",
+      "value": "target-url, Accept, Content-Type"
+    }
+  ],
+  "functions": {
+    "pages/api/**/*.js": {
+      "memory": 1024,
+      "maxDuration": 10
+    }
+  },
   "routes": [
     {
       "src": "/api/(.*)",
