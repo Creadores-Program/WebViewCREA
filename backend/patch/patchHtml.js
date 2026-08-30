@@ -157,11 +157,24 @@ export default async function patchHtml(html, headers) {
       }
     }
   });
+  $('img[srcset]').each((_, elem) => {
+    const $img = $(elem);
+    const srcset = $img.attr('srcset');
+    if (srcset) {
+      const firstUrl = srcset.split(',')[0].trim().split(' ')[0];
+      if (!$img.attr('src')) {
+        $img.attr('src', firstUrl);
+      }
+    }
+  });
+  const jsonparch = '<script src="https://cdnjs.cloudflare.com/ajax/libs/json3/3.3.2/json3.min.js"></script>';
+  const html5ShivScript = '<script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.min.js"></script>\n';
   const coreJsScript = '<script src="https://cdnjs.cloudflare.com/ajax/libs/core-js/3.38.1/minified.js"></script>\n';
+  const es5shims = '<script src="https://cdnjs.cloudflare.com/ajax/libs/es5-shim/4.6.7/es5-shim.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/es5-shim/4.6.7/es5-sham.min.js"></script>';
   if ($('head').length > 0) {
-    $('head').prepend(coreJsScript+(await loadPolyfills()));
+    $('head').prepend(jsonparch+es5shims+html5ShivScript+coreJsScript+(await loadPolyfills()));
   } else {
-    $.root().prepend(coreJsScript+(await loadPolyfills()));
+    $.root().prepend(jsonparch+es5shims+html5ShivScript+coreJsScript+(await loadPolyfills()));
   }
 
   const eventPromises = [];
