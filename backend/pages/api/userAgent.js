@@ -1,4 +1,3 @@
-import setHeaders from '../../utils/Utils.js';
 import * as userAgents from '../../utils/UserAgent.js';
 
 export default async function handler(req, res) {
@@ -6,7 +5,6 @@ export default async function handler(req, res) {
     res.status(405).json({ error: 'Method Not Allowed' });
     return;
   }
-  setHeaders(res);
   if(req.method == 'OPTIONS'){
     res.status(200).end();
     return;
