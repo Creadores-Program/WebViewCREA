@@ -6,7 +6,9 @@
       "use": "@vercel/next"
     }
   ],
-  "headers": [
+  "headers": [{
+    "source": "/api/(.*)",
+    "headers": [
     {
       "key": "Cache-Control",
       "value": "public, max-age=864000, s-maxage=864000, stale-while-revalidate=86400"
@@ -34,8 +36,8 @@
     {
       "key": "Vary",
       "value": "target-url, Accept, Content-Type"
-    }
-  ],
+    }]
+  }],
   "functions": {
     "pages/api/**/*.js": {
       "memory": 1024,
