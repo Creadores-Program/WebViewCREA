@@ -90,11 +90,27 @@ export default async function patchHtml(html, headers) {
   });
   $('link[rel="stylesheet"]').each((_, elem) => {
     const $link = $(elem);
-    const url = $link.attr('href') || $link.attr('src');
-    const promise = patchCss(null, resolveUrl(url, baseUrl), headers).then((patchedCss) => {
-      $link.replaceWith('<style type="text/css">/n'+patchedCss+"/n</style>");
-    });
-    stylePromises.push(promise);
+    const rawUrl = $link.attr('href') || $link.attr('src');
+    if (!rawUrl) return;
+
+    const targetUrl = resolveUrl(rawUrl, baseUrl);
+    const clientScript = `(function(){` +
+      `var xhr = new XMLHttpRequest();` +
+      `xhr.open('GET', 'https://webviewcrea.vercel.app/api/patchCSS', true);` +
+      `xhr.setRequestHeader('target-url', ${JSON.stringify(targetUrl)});` +
+      `xhr.onreadystatechange = function(){` +
+        `if(xhr.readyState === 4 && xhr.status === 200){` +
+          `var st = document.createElement('style');` +
+          `st.type = 'text/css';` +
+          `if(st.styleSheet){ st.styleSheet.cssText = xhr.responseText; }` +
+          `else { st.appendChild(document.createTextNode(xhr.responseText)); }` +
+          `document.getElementsByTagName('head')[0].appendChild(st);` +
+        `}` +
+      `};` +
+      `xhr.send();` +
+    `})();`;
+
+    $link.replaceWith('<script type="text/javascript">' + clientScript + '</script>');
   });
   $('[style]').each((_, elem) => {
     const $elem = $(elem);
@@ -128,25 +144,24 @@ export default async function patchHtml(html, headers) {
       const src = $script.attr('src');
       const jsContent = $script.html();
       if (src) {
-        let srcP = resolveUrl(src, baseUrl);
-        const promise = fetch(srcP, {
-          headers: {
-            ...headers,
-            'host': baseHost,
-            'origin': baseHost
-          }
-        }).then((res) => {
-          if (!res.ok) throw new Error(`HTTP ${res.status} al obtener ${srcP}`);
-          return res.text();
-        })
-        .then((remoteJs) => {
-          return patchJs(remoteJs, globalImportMap, { scriptUrl: srcP });
-        })
-        .then((patchedJs) => {
-            $script.removeAttr('src');
-            $script.text(patchedJs);
-        });
-        scriptPromises.push(promise);
+        const targetUrl = resolveUrl(src, baseUrl);
+        const clientScript = `(function(){` +
+          `var xhr = new XMLHttpRequest();` +
+          `xhr.open('GET', 'https://webviewcrea.vercel.app/api/patchJS', true);` +
+          `xhr.setRequestHeader('target-url', ${JSON.stringify(targetUrl)});` +
+          `xhr.onreadystatechange = function(){` +
+            `if(xhr.readyState === 4 && xhr.status === 200){` +
+              `var sc = document.createElement('script');` +
+              `sc.type = 'text/javascript';` +
+              `try { sc.appendChild(document.createTextNode(xhr.responseText)); }` +
+              `catch(e){ sc.text = xhr.responseText; }` +
+              `document.getElementsByTagName('head')[0].appendChild(sc);` +
+            `}` +
+          `};` +
+          `xhr.send();` +
+        `})();`;
+        $script.removeAttr('src');
+        $script.text(clientScript);
         return;
       }
       if (jsContent && jsContent.trim()) {
