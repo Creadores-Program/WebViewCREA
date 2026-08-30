@@ -32,7 +32,7 @@
     }]
   }],
   "functions": {
-    "pages/api/**/*.js": {
+    "api/**/*": {
       "memory": 1024,
       "maxDuration": 10
     }
