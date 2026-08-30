@@ -3,8 +3,10 @@ package org.CreadoresProgram.WebViewCREA.network;
 import java.util.Locale;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 import java.io.IOException;
+
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
@@ -14,14 +16,20 @@ import okhttp3.ConnectionPool;
 import okhttp3.Cookie;
 import okhttp3.CookieJar;
 import okhttp3.HttpUrl;
+import okhttp3.Protocol;
+
 import android.webkit.CookieManager;
 
 public class NetClient{
   private OkHttpClient clientHt = new OkHttpClient.Builder()
     .connectionPool(new ConnectionPool(5, 5, TimeUnit.MINUTES))
-    .connectTimeout(60, TimeUnit.SECONDS)
+    .connectTimeout(30, TimeUnit.SECONDS)
     .writeTimeout(60, TimeUnit.SECONDS)
     .readTimeout(60, TimeUnit.SECONDS)
+    .followRedirects(true)
+    .followSslRedirects(true)
+    .retryOnConnectionFailure(true)
+    .protocols(Arrays.asList(Protocol.HTTP_2, Protocol.HTTP_1_1))
     .cookieJar(new CookieJar() {
       @Override
       public void saveFromResponse(HttpUrl url, List<Cookie> cookies) {
