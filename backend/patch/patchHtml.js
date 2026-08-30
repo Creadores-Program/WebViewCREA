@@ -5,6 +5,7 @@ import { readFile } from 'node:fs/promises';
 import userAgent from '../utils/UserAgent.js';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
+import { minify } from 'html-minifier-terser';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -195,5 +196,21 @@ export default async function patchHtml(html, headers) {
     }
   });
   await Promise.all([...stylePromises, ...scriptPromises, ...eventPromises]);
-  return $.html();
+  let rawHtml = $.html();
+  try {
+    const minifiedHtml = await minify(rawHtml, {
+      collapseWhitespace: true,
+      conservativeCollapse: true,
+      removeComments: true,
+      removeRedundantAttributes: false,
+      removeEmptyAttributes: false,
+      caseSensitive: false,
+      minifyCSS: false,
+      minifyJS: false
+    });
+    return minifiedHtml;
+  } catch (err) {
+    console.error('Error min HTML:', err);
+    return rawHtml;
+  }
 }
