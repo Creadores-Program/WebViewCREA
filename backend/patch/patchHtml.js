@@ -1,34 +1,20 @@
 import * as cheerio from 'cheerio';
 import patchCss from './patchCss.js';
 import patchJs from './patchJs.js';
-import { readFile } from 'node:fs/promises';
 import userAgent from '../utils/UserAgent.js';
-import { fileURLToPath } from 'node:url';
-import path from 'node:path';
 import { minify } from 'html-minifier-terser';
+import customEventPoly from '!raw-loader!../polyfills/customEventPoly.js';
+import runtime from '!raw-loader!../polyfills/runtime.js';
+import urlPolyfill from '!raw-loader!../polyfills/url-polyfill.js';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const POLYFILLS = [
+  customEventPoly,
+  runtime,
+  urlPolyfill,
+].join("\n\n");
 
-const POLYFILL_PATHS = {
-  customEventPoly: path.join(__dirname, '../polyfills/customEventPoly.js'),
-  runtime: path.join(__dirname, '../polyfills/runtime.js'),
-  'url-polyfill': path.join(__dirname, '../polyfills/url-polyfill.js'),
-};
-async function readPolyfill(name){
-  return await readFile(POLYFILL_PATHS[name], 'utf-8');
-}
-
-async function loadPolyfills(){
-  let polyfills = [
-    "customEventPoly",
-    "runtime",
-    "url-polyfill"
-  ];
-  let scripts = "";
-  for(let polyName of polyfills){
-    scripts += '<script type="text/javascript">\n'+await readPolyfill(polyName)+'\n</script>\n';
-  }
-  return scripts;
+function loadPolyfills(){
+  return '<script type="text/javascript">\n'+POLYFILLS+'\n</script>\n';
 }
 
 function resolveUrl(url, base){
@@ -171,9 +157,9 @@ export default async function patchHtml(html, headers) {
   const coreJsScript = '<script src="https://cdnjs.cloudflare.com/ajax/libs/core-js/3.38.1/minified.js"></script>\n';
   const es5shims = '<script src="https://cdnjs.cloudflare.com/ajax/libs/es5-shim/4.6.7/es5-shim.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/es5-shim/4.6.7/es5-sham.min.js"></script>';
   if ($('head').length > 0) {
-    $('head').prepend(jsonparch+es5shims+html5ShivScript+coreJsScript+(await loadPolyfills()));
+    $('head').prepend(jsonparch+es5shims+html5ShivScript+coreJsScript+loadPolyfills());
   } else {
-    $.root().prepend(jsonparch+es5shims+html5ShivScript+coreJsScript+(await loadPolyfills()));
+    $.root().prepend(jsonparch+es5shims+html5ShivScript+coreJsScript+loadPolyfills());
   }
 
   const eventPromises = [];
