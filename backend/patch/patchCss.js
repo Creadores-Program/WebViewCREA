@@ -6,7 +6,7 @@ import autoprefixer from 'autoprefixer';
 import cssnano from 'cssnano';
 import userAgent from '../utils/UserAgent.js';
 
-const singleColonPlugin = () => {
+/*const singleColonPlugin = () => {
   return {
     postcssPlugin: 'convert-single-colon',
     Rule(rule) {
@@ -15,7 +15,7 @@ const singleColonPlugin = () => {
       }
     }
   };
-};
+};*/
 
 export default async function patchCss(css, sourceUrl, headers){
   if(sourceUrl && !css){
@@ -35,7 +35,7 @@ export default async function patchCss(css, sourceUrl, headers){
   }
   const plugins = [
     postcssImport(),
-    singleColonPlugin(),
+    //singleColonPlugin(),
     postcssPresetEnv({
       stage: 0,
       browsers: [
@@ -68,6 +68,8 @@ export default async function patchCss(css, sourceUrl, headers){
   }
   plugins.push(cssnano({
     preset: 'default',
+    autoprefixer: false, 
+    discardUnused: false
   }));
   const result = await postcss(plugins).process(css, { from: undefined });
   return result.css;
