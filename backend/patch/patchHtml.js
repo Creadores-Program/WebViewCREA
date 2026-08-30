@@ -72,50 +72,22 @@ export default async function patchHtml(html, headers) {
       if (cssContent && cssContent.trim()) {
         const promise = patchCss(cssContent, baseUrl).then((patchedCss) => {
           $style.text(patchedCss);
+        }).catch((err) =>{
+          console.error(err);
         });
         stylePromises.push(promise);
       }
     }
   });
-  let cssCounter = 0;
   $('link[rel="stylesheet"]').each((_, elem) => {
     const $link = $(elem);
-    const rawUrl = $link.attr('href') || $link.attr('src');
-    if (!rawUrl) return;
-
-    cssCounter++;
-    const styleId = 'patch-css-' + cssCounter;
-    const targetUrl = resolveUrl(rawUrl, baseUrl);
-    const clientScript = `(function(){` +
-      `var xhrFetch = new XMLHttpRequest();` +
-      `xhrFetch.open('GET', ${JSON.stringify(targetUrl)}, true);` +
-      `xhrFetch.onreadystatechange = function(){` +
-        `if(xhrFetch.readyState === 4 && xhrFetch.status === 200){` +
-          `var originalCss = xhrFetch.responseText;` +
-          `var xhrPost = new XMLHttpRequest();` +
-          `xhrPost.open('POST', 'https://webviewcrea.vercel.app/api/patchCSS', true);` +
-          `xhrPost.setRequestHeader('Content-Type', 'text/css');` +
-          `xhrPost.onreadystatechange = function(){` +
-            `if(xhrPost.readyState === 4 && xhrPost.status === 200){` +
-              `var el = document.getElementById(${JSON.stringify(styleId)});` +
-              `if(el){` +
-                `try { el.innerHTML = xhrPost.responseText; }` +
-                `catch(e){` +
-                  `if(el.styleSheet){ el.styleSheet.cssText = xhrPost.responseText; }` +
-                `}` +
-              `}` +
-            `}` +
-          `};` +
-          `xhrPost.send(originalCss);` +
-        `}` +
-      `};` +
-      `xhrFetch.send();` +
-    `})();`;
-
-    $link.replaceWith(
-      `<style id="${styleId}" type="text/css"></style>` +
-      `<script type="text/javascript">${clientScript}</script>`
-    );
+    const url = $link.attr('href') || $link.attr('src');
+    const promise = patchCss(null, resolveUrl(url, baseUrl), headers).then((patchedCss) => {
+      $link.replaceWith('<style type="text/css">/n'+patchedCss+"/n</style>");
+    }).catch((err) =>{
+      console.error(err);
+    });
+    stylePromises.push(promise);
   });
   $('[style]').each((_, elem) => {
     const $elem = $(elem);
@@ -127,6 +99,8 @@ export default async function patchHtml(html, headers) {
         if (match && match[1]) {
           $elem.attr('style', match[1].trim());
         }
+      }).catch((err) =>{
+        console.error(err);
       });
       stylePromises.push(promise);
     }
@@ -149,37 +123,34 @@ export default async function patchHtml(html, headers) {
       const src = $script.attr('src');
       const jsContent = $script.html();
       if (src) {
-        const targetUrl = resolveUrl(src, baseUrl);
-        const clientScript = `(function(){` +
-            `var xhrFetch = new XMLHttpRequest();` +
-            `xhrFetch.open('GET', ${JSON.stringify(targetUrl)}, true);` +
-            `xhrFetch.onreadystatechange = function(){` +
-                `if(xhrFetch.readyState === 4 && xhrFetch.status === 200){` +
-                    `var originalJs = xhrFetch.responseText;` +
-                    `var xhrPost = new XMLHttpRequest();` +
-                    `xhrPost.open('POST', 'https://webviewcrea.vercel.app/api/patchJS', true);` +
-                    `xhrPost.setRequestHeader('Content-Type', 'application/javascript');` +
-                    `xhrPost.onreadystatechange = function(){` +
-                        `if(xhrPost.readyState === 4 && xhrPost.status === 200){` +
-                            `var sc = document.createElement('script');` +
-                            `sc.type = 'text/javascript';` +
-                            `try { sc.appendChild(document.createTextNode(xhrPost.responseText)); }` +
-                            `catch(e){ sc.text = xhrPost.responseText; }` +
-                            `(document.getElementsByTagName('head')[0] || document.documentElement).appendChild(sc);` +
-                        `}` +
-                    `};` +
-                    `xhrPost.send(originalJs);` +
-                `}` +
-            `};` +
-            `xhrFetch.send();` +
-        `})();`;
-        $script.removeAttr('src');
-        $script.text(clientScript);
+        let srcP = resolveUrl(src, baseUrl);
+        const promise = fetch(srcP, {
+          headers: {
+            ...headers,
+            'host': baseHost,
+            'origin': baseHost
+          }
+        }).then((res) => {
+          if (!res.ok) throw new Error(`HTTP ${res.status} al obtener ${srcP}`);
+          return res.text();
+        })
+        .then((remoteJs) => {
+          return patchJs(remoteJs, globalImportMap, { scriptUrl: srcP });
+        })
+        .then((patchedJs) => {
+            $script.removeAttr('src');
+            $script.text(patchedJs);
+        }).catch((err) =>{
+            console.error(err);
+        });
+        scriptPromises.push(promise);
         return;
       }
       if (jsContent && jsContent.trim()) {
         const promise = patchJs(jsContent, globalImportMap, { scriptUrl: baseUrl }).then((patchedJs) => {
           $script.text(patchedJs);
+        }).catch((err) =>{
+          console.error(err);
         });
         scriptPromises.push(promise);
       }
@@ -218,7 +189,7 @@ export default async function patchHtml(html, headers) {
           .then((patchedJs) => {
             $(elem).attr(attrName, patchedJs);
           })
-          .catch((err) => console.error(`Error al parchear ${attrName}:`, err));
+          .catch((err) => console.error(err));
 
         eventPromises.push(promise);
       }
@@ -230,7 +201,7 @@ export default async function patchHtml(html, headers) {
             .then((patchedJs) => {
               $(elem).attr(attrName, `javascript:${patchedJs}`);
             })
-            .catch((err) => console.error(`Error al parchear ${attrName}:`, err));
+            .catch((err) => console.error(err));
           eventPromises.push(promise);
         }
       }
