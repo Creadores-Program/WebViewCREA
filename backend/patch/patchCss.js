@@ -28,8 +28,9 @@ export default async function patchCss(css, sourceUrl, headers){
     });
     if(!request.ok){
       css = css || "";
+    }else{
+      css = await request.text();
     }
-    css = await request.text();
   }
   const plugins = [
     postcssImport(),
