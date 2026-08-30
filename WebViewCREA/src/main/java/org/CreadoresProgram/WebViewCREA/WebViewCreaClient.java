@@ -125,7 +125,7 @@ public class WebViewCreaClient extends WebViewClient{
         view.post(new Runnable(){
             @Override
             public void run(){
-                view.loadDataWithBaseURL(url, data, mimetype, ENCODE, null);
+                view.loadDataWithBaseURL(url, data, mimetype, ENCODE, url);
             }
         });
     }
