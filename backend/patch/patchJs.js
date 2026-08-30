@@ -1,5 +1,6 @@
 import babel from '@babel/core';
 import presetEnv from '@babel/preset-env';
+import { minify } from 'terser';
 
 function es5SyncRemoteProxyPlugin({ types: t }, options) {
   const { mapImport = {}, scriptUrl = '' } = options;
@@ -26,7 +27,7 @@ function es5SyncRemoteProxyPlugin({ types: t }, options) {
             var targetUrl = '${targetUrl}';
             var proxyUrl = '${PROXY_ENDPOINT}';
             
-            var xhrGet = new XMLHttpRequest();
+            var xhrGet = new (window.XMLHttpRequest || ActiveXObject)('MSXML2.XMLHTTP.3.0');
             xhrGet.open('GET', targetUrl, false);
             xhrGet.send(null);
             
@@ -108,6 +109,39 @@ export default async function patchJs(jscode, mapImport = {}, config = {}) {
   });
 
   let code = result.code;
+
+  try {
+    const minified = await minify(code, {
+      ecma: 5,
+      ie8: true,
+      safari10: true,
+      compress: {
+        ecma: 5,
+        warnings: false,
+        comparisons: false,
+        inline: 2,
+        keep_infinity: true,
+        drop_debugger: true,
+        drop_console: false
+      },
+      mangle: {
+        ie8: true
+      },
+      output: {
+        ecma: 5,
+        quote_keys: true,
+        ascii_only: true,
+        comments: false,
+        ie8: true
+      }
+    });
+
+    if (minified.code) {
+      code = minified.code;
+    }
+  } catch (err) {
+    console.error("Error minificando con Terser:", err);
+  }
 
   if (isInline) {
     code = code.replace(/[\r\n]+/g, ' ').trim();
