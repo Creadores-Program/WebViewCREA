@@ -214,7 +214,7 @@ public class WebViewCreaClient extends WebViewClient{
         }
         loadBaseUrlNative(view, url, data, MIMETYPE_CSS);
     }
-    public String getUserAgent(final WebView view, final UserAgentsIds userAgentId){
+    public String getUserAgent(final WebView view, final RemoteUserAgentsIds userAgentId){
         final CountDownLatch latch = new CountDownLatch(1);
         final String[] result = new String[1];
         background.execute(new Runnable(){
@@ -251,11 +251,16 @@ public class WebViewCreaClient extends WebViewClient{
         });
     }
     public enum LocalUserAgents{
-        LEGACY_CHROME("Mozilla/5.0 (Linux; Android 4.4.2; Nexus 5 Build/KOT49H) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/30.0.0.0 Mobile Safari/537.36"),//Chrome 30
-        LEGACY_WEBKIT("Mozilla/5.0 (Linux; U; Android 4.3; es-es; Galaxy Nexus Build/JWR66Y) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.30"),//Webkit 534
-        CHROME_M("Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2564.95 Mobile Safari/537.36"),//Chrome 48
-        CHROME_K("Mozilla/5.0 (Linux; Android 10; SM-G960F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Mobile Safari/537.36"),//Chrome 80
-        CHROME_MODERN("Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36");//Chrome 124
+        LEGACY_WEBKIT("Mozilla/5.0 (Linux; U; Android 4.3; es-es; Galaxy Nexus Build/JWR66Y) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.30"),//Webkit 534 (Android 4.3)
+        LEGACY_CHROME("Mozilla/5.0 (Linux; Android 4.4.2; Nexus 5 Build/KOT49H) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/30.0.0.0 Mobile Safari/537.36"),//Chrome 30 (Android 4.4)
+        CHROME_M("Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2564.95 Mobile Safari/537.36"),//Chrome 48 (Android 6)
+        CHROME_K("Mozilla/5.0 (Linux; Android 10; SM-G960F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Mobile Safari/537.36"),//Chrome 80 (Android 10)
+        CHROME_MODERN("Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36"),//Chrome 124 (Android 14)
+        LEGACY_WEBKIT_DESK("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:15.0) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 Safari/534.30"),//Webkit 534 (Linux Ubuntu)
+        LEGACY_CHROME_DESK("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/30.0.1599.114 Safari/537.36"),//Chrome 30 (Linux)
+        CHROME_M_DESK("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2564.116 Safari/537.36"),//Chrome 48 (Linux)
+        CHROME_K_DESK("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.162 Safari/537.36"),//Chrome 80 (Linux)
+        CHROME_MODERN_DESK("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"),//Chrome 124 (Linux)
 
         private final String userAgent;
         LocalUserAgents(String userAgent){
@@ -266,7 +271,7 @@ public class WebViewCreaClient extends WebViewClient{
             return this.userAgent;
         }
     }
-    public enum UserAgentsIds{
+    public enum RemoteUserAgentsIds{
         DEFAULT("default"),//Chrome Mobile 151+ (Android 10)
         FIREFOX_MOBILE("firefoxMobile"),//Firefox Mobile 154+ (Android 13)
         SAFARI_MOBILE("safariMobile"),//Safari Mobile 605+ (iPhone 17)
@@ -278,7 +283,7 @@ public class WebViewCreaClient extends WebViewClient{
 
         private final String userAgentId;
 
-        UserAgentsIds(String userAgentId){
+        RemoteUserAgentsIds(String userAgentId){
             this.userAgentId = userAgentId;
         }
         @Override
