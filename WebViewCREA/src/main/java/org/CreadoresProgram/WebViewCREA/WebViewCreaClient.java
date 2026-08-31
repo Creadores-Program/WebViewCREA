@@ -260,9 +260,10 @@ public class WebViewCreaClient extends WebViewClient{
         LEGACY_CHROME_DESK("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/30.0.1599.114 Safari/537.36"),//Chrome 30 (Linux)
         CHROME_M_DESK("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2564.116 Safari/537.36"),//Chrome 48 (Linux)
         CHROME_K_DESK("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.162 Safari/537.36"),//Chrome 80 (Linux)
-        CHROME_MODERN_DESK("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"),//Chrome 124 (Linux)
+        CHROME_MODERN_DESK("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36");//Chrome 124 (Linux)
 
         private final String userAgent;
+        
         LocalUserAgents(String userAgent){
             this.userAgent = userAgent;
         }
