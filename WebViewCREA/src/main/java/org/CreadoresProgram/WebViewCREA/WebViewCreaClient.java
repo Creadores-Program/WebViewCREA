@@ -1,5 +1,6 @@
 package org.CreadoresProgram.WebViewCREA;
 import android.webkit.WebViewClient;
+import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebResourceRequest;
 import android.webkit.CookieManager;
@@ -18,6 +19,7 @@ import org.CreadoresProgram.WebViewCREA.network.NetRes;
 
 public class WebViewCreaClient extends WebViewClient{
     private final NetClient client = new NetClient();
+    private WebChromeClient chromeClient = null;
     private final ExecutorService background = Executors.newCachedThreadPool();
     private boolean desktop = false;
     private static final String[] urlsPassed = { "http", "https", "javascript" };
@@ -72,11 +74,13 @@ public class WebViewCreaClient extends WebViewClient{
         }catch(Exception e){
             cookie[0] = null;
         }
+        onProgressChanged(view, 1);
         background.execute(new Runnable() {
             @Override public void run() {
                 NetRes res = null;
                 try{
                     res = client.get(url, userAgent, desktop, cookie[0]);
+                    onProgressChanged(view, 25);
                     Map<String, String> headers = res.getHeaders();
                     if(!headers.containsKey("content-type")){
                         loadUrlNative(view, url);
@@ -123,6 +127,7 @@ public class WebViewCreaClient extends WebViewClient{
         view.post(new Runnable(){
             @Override
             public void run(){
+                onProgressChanged(view, 100);
                 view.loadUrl(url);
             }
         });
@@ -132,6 +137,7 @@ public class WebViewCreaClient extends WebViewClient{
         view.post(new Runnable(){
             @Override
             public void run(){
+                onProgressChanged(view, 100);
                 view.loadDataWithBaseURL(url, data, mimetype, ENCODE, url);
             }
         });
@@ -147,11 +153,27 @@ public class WebViewCreaClient extends WebViewClient{
     public void setDesktop(boolean desktop){
         this.desktop = desktop;
     }
+
+    public void setWebChromeClient(WebView view, WebChromeClient chromeClient){
+        this.chromeClient = chromeClient;
+        view.setWebChromeClient(chromeClient);
+    }
+    private void onProgressChanged(WebView view, int newProgress){
+        if(this.chromeClient != null){
+            view.post(new Runnable(){
+                @Override
+                public void run(){
+                    chromeClient.onProgressChanged(view, newProgress);
+                }
+            })
+        }
+    }
     private void patchHtml(WebView view, String data, String url, String userAgent, String cookie){
         data = insertTagWebView(data, url);
         NetRes res = null;
         try{
             res = client.post(PROXY_PATCH_HTML, userAgent, desktop, data, cookie);
+            onProgressChanged(view, 50);
             data = res.getData();
         }catch(Exception e){
             e.printStackTrace();
@@ -174,6 +196,9 @@ public class WebViewCreaClient extends WebViewClient{
         NetRes res = null;
         try{
             res = client.post(PROXY_PATCH_JS, userAgent, desktop, data, cookie);
+            if(!execute){
+                onProgressChanged(view, 50);
+            }
             data = res.getData();
         }catch(Exception e){
             e.printStackTrace();
@@ -204,6 +229,7 @@ public class WebViewCreaClient extends WebViewClient{
         NetRes res = null;
         try{
             res = client.post(PROXY_PATCH_CSS, userAgent, desktop, data, cookie);
+            onProgressChanged(view, 50);
             data = res.getData();
         }catch(Exception e){
             e.printStackTrace();

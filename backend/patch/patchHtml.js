@@ -6,11 +6,15 @@ import { minify } from 'html-minifier-terser';
 import urlPolyfill from '../polyfills/url-polyfill.js';
 import customEventPoly from '../polyfills/customEventPoly.js';
 import runtime from '../polyfills/runtime.js';
+import fetchPoly from '../polyfills/fetch.js';
+import uriPoly from '../polyfills/uriPoly.js';
 
 const POLYFILLS = [
+  uriPoly,
   customEventPoly,
   runtime,
   urlPolyfill,
+  fetchPoly
 ].join("\n\n");
 
 function loadPolyfills(){
@@ -168,14 +172,17 @@ export default async function patchHtml(html, headers) {
       }
     }
   });
-  const jsonparch = '<script src="https://cdnjs.cloudflare.com/ajax/libs/json3/3.3.2/json3.min.js"></script>';
-  const html5ShivScript = '<script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.min.js"></script>\n';
-  const coreJsScript = '<script src="https://cdnjs.cloudflare.com/ajax/libs/core-js/3.38.1/minified.js"></script>\n';
-  const es5shims = '<script src="https://cdnjs.cloudflare.com/ajax/libs/es5-shim/4.6.7/es5-shim.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/es5-shim/4.6.7/es5-sham.min.js"></script>';
+  const jsonparch = '<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/json3/3.3.2/json3.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>';
+  const underscore = '<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.13.6/underscore-min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>'
+  const html5ShivScript = '<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>\n';
+  const coreJsScript = '<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/core-js/3.38.1/minified.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>\n';
+  const es5shims = '<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/es5-shim/4.6.7/es5-shim.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/es5-shim/4.6.7/es5-sham.min.js"  crossorigin="anonymous" referrerpolicy="no-referrer"></script>\n';
+  const es6shims = '<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/es6-shim/0.35.8/es6-sham.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/es6-shim/0.35.8/es6-shim.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>';
+  const normalizePoly = '<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/unorm@1.6.0/lib/unorm.min.js"></script>\n';
   if ($('head').length > 0) {
-    $('head').prepend(jsonparch+es5shims+html5ShivScript+coreJsScript+loadPolyfills());
+    $('head').prepend(loadPolyfills()+jsonparch+es5shims+html5ShivScript+coreJsScript);
   } else {
-    $.root().prepend(jsonparch+es5shims+html5ShivScript+coreJsScript+loadPolyfills());
+    $.root().prepend(loadPolyfills()+jsonparch+es5shims+es6shims+html5ShivScript+coreJsScript+normalizePoly);
   }
 
   const eventPromises = [];
