@@ -165,7 +165,7 @@ public class WebViewCreaClient extends WebViewClient{
                 public void run(){
                     chromeClient.onProgressChanged(view, newProgress);
                 }
-            })
+            });
         }
     }
     private void patchHtml(WebView view, String data, String url, String userAgent, String cookie){
