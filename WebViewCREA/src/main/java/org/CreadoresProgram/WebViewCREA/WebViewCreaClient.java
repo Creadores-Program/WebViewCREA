@@ -47,6 +47,7 @@ public class WebViewCreaClient extends WebViewClient{
     }
 
     private boolean uniShouldOverrideUrlLoading(final WebView view, final String url){
+        onProgressChanged(view, 0);
         boolean urlPassed = false;
         for(String scheme : urlsPassed){
             if(url.startsWith(scheme)){
