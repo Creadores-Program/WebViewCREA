@@ -179,10 +179,11 @@ export default async function patchHtml(html, headers) {
   const es5shims = '<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/es5-shim/4.6.7/es5-shim.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/es5-shim/4.6.7/es5-sham.min.js"  crossorigin="anonymous" referrerpolicy="no-referrer"></script>\n';
   const es6shims = '<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/es6-shim/0.35.8/es6-sham.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/es6-shim/0.35.8/es6-shim.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>';
   const normalizePoly = '<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/unorm@1.6.0/lib/unorm.min.js"></script>\n';
+  const strScripts = loadPolyfills()+jsonparch+es5shims+es6shims+html5ShivScript+coreJsScript+normalizePoly+underscore;
   if ($('head').length > 0) {
-    $('head').prepend(loadPolyfills()+jsonparch+es5shims+html5ShivScript+coreJsScript);
+    $('head').prepend(strScripts);
   } else {
-    $.root().prepend(loadPolyfills()+jsonparch+es5shims+es6shims+html5ShivScript+coreJsScript+normalizePoly);
+    $.root().prepend(strScripts);
   }
 
   const eventPromises = [];
