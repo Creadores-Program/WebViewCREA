@@ -145,7 +145,7 @@ export default async function patchHtml(html, headers) {
         }
         const promise = fetch(srcP, {
           headers: {
-            'headers': ...headersLoc,
+            'headers': headersLoc,
             'host': baseHost,
             'origin': baseHost
           }
