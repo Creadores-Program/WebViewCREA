@@ -4,14 +4,12 @@ import patchJs from './patchJs.js';
 import userAgent from '../utils/UserAgent.js';
 import { minify } from 'html-minifier-terser';
 import urlPolyfill from '../polyfills/url-polyfill.js';
-import customEventPoly from '../polyfills/customEventPoly.js';
 import runtime from '../polyfills/runtime.js';
 import fetchPoly from '../polyfills/fetch.js';
 import uriPoly from '../polyfills/uriPoly.js';
 
 const POLYFILLS = [
   uriPoly,
-  customEventPoly,
   runtime,
   urlPolyfill,
   fetchPoly
@@ -185,19 +183,20 @@ export default async function patchHtml(html, headers) {
       }
     }
   });
-  const jsonparch = '<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/json3/3.3.2/json3.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>';
-  const underscore = '<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.13.6/underscore-min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>'
+  const jsonparch = '<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/json3/3.3.2/json3.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>\n';
+  const underscore = '<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.13.6/underscore-min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>\n'
   const html5ShivScript = '<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>\n';
   const coreJsScript = '<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/core-js/3.38.1/minified.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>\n';
   const es5shims = '<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/es5-shim/4.6.7/es5-shim.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/es5-shim/4.6.7/es5-sham.min.js"  crossorigin="anonymous" referrerpolicy="no-referrer"></script>\n';
-  const es6shims = '<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/es6-shim/0.35.8/es6-sham.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/es6-shim/0.35.8/es6-shim.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>';
+  const es6shims = '<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/es6-shim/0.35.8/es6-sham.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/es6-shim/0.35.8/es6-shim.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>\n';
   const normalizePoly = '<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/unorm@1.6.0/lib/unorm.min.js"></script>\n';
-  const interObserver = '<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/intersection-observer@0.12.2/intersection-observer.min.js"></script>\n';
-  const resizeObserver = '<script type="text/javascript" src="https://unpkg.com/resize-observer-polyfill@1.5.1/dist/ResizeObserver.js"></script>\n';
-  const dialogPoly = '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dialog-polyfill/0.5.6/dialog-polyfill.min.css">\n<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/dialog-polyfill/0.5.6/dialog-polyfill.min.js"></script>\n';
-  const customWeb = '<script type="text/javascript" src="https://unpkg.com/@webcomponents/webcomponentsjs@2.8.0/webcomponents-bundle.js"></script>\n';
-  const webStream = '<script type="text/javascript" src="https://unpkg.com/web-streams-polyfill/dist/polyfill.es5.js"></script>\n';
-  const strScripts = loadPolyfills()+jsonparch+es5shims+es6shims+html5ShivScript+coreJsScript+normalizePoly+underscore+interObserver+resizeObserver+dialogPoly+customWeb+webStream;
+  const interObserver = '<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/intersection-observer@0.12.2/intersection-observer.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>\n';
+  const resizeObserver = '<script type="text/javascript" src="https://unpkg.com/resize-observer-polyfill@1.5.1/dist/ResizeObserver.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>\n';
+  const dialogPoly = '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dialog-polyfill/0.5.6/dialog-polyfill.min.css">\n<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/dialog-polyfill/0.5.6/dialog-polyfill.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>\n';
+  const customWeb = '<script type="text/javascript" src="https://unpkg.com/@webcomponents/webcomponentsjs@2.8.0/webcomponents-bundle.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>\n';
+  const dom4 = '<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/dom4/2.1.6/dom4.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>';
+  const webStream = '<script type="text/javascript" src="https://unpkg.com/web-streams-polyfill/dist/polyfill.es5.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>\n';
+  const strScripts = loadPolyfills()+jsonparch+es5shims+es6shims+html5ShivScript+coreJsScript+normalizePoly+underscore+interObserver+resizeObserver+dialogPoly+customWeb+dom4+webStream;
   if ($('head').length > 0) {
     $('head').prepend(strScripts);
   } else {
