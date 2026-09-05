@@ -46,6 +46,9 @@ export default async function patchHtml(html, headers) {
   delete headers["Keep-Alive"];
   delete headers["connection"];
   delete headers["keep-alive"];
+  let headersNoCookie = { ...headers };
+  delete headersNoCookie["cookie"];
+  delete headersNoCookie["Cookie"];
   const $ = cheerio.load(html, { decodeEntities: false });
   const baseUrl = $('webviewcrea')?.attr('baseurl');
   const baseHost = new URL(baseUrl).hostname;
@@ -88,7 +91,12 @@ export default async function patchHtml(html, headers) {
   $('link[rel="stylesheet"]').each((_, elem) => {
     const $link = $(elem);
     const url = $link.attr('href') || $link.attr('src');
-    const promise = patchCss(null, resolveUrl(url, baseUrl), headers).then((patchedCss) => {
+    const urlP = resolveUrl(url, baseUrl);
+    let headersLoc = headers;
+    if(new URL(urlP).hostname != baseHost){
+      headersLoc = headersNoCookie;
+    }
+    const promise = patchCss(null, urlP, headersLoc).then((patchedCss) => {
       $link.replaceWith('<style type="text/css">/n'+patchedCss+"/n</style>");
     }).catch((err) =>{
       console.error(err);
@@ -130,9 +138,13 @@ export default async function patchHtml(html, headers) {
       const jsContent = $script.html();
       if (src) {
         let srcP = resolveUrl(src, baseUrl);
+        let headersLoc = headers;
+        if(new URL(srcP).hostname != baseHost){
+          headersLoc = headersNoCookie;
+        }
         const promise = fetch(srcP, {
           headers: {
-            ...headers,
+            'headers': ...headersLoc,
             'host': baseHost,
             'origin': baseHost
           }
@@ -179,7 +191,12 @@ export default async function patchHtml(html, headers) {
   const es5shims = '<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/es5-shim/4.6.7/es5-shim.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/es5-shim/4.6.7/es5-sham.min.js"  crossorigin="anonymous" referrerpolicy="no-referrer"></script>\n';
   const es6shims = '<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/es6-shim/0.35.8/es6-sham.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/es6-shim/0.35.8/es6-shim.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>';
   const normalizePoly = '<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/unorm@1.6.0/lib/unorm.min.js"></script>\n';
-  const strScripts = loadPolyfills()+jsonparch+es5shims+es6shims+html5ShivScript+coreJsScript+normalizePoly+underscore;
+  const interObserver = '<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/intersection-observer@0.12.2/intersection-observer.min.js"></script>\n';
+  const resizeObserver = '<script type="text/javascript" src="https://unpkg.com/resize-observer-polyfill@1.5.1/dist/ResizeObserver.js"></script>\n';
+  const dialogPoly = '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dialog-polyfill/0.5.6/dialog-polyfill.min.css">\n<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/dialog-polyfill/0.5.6/dialog-polyfill.min.js"></script>\n';
+  const customWeb = '<script type="text/javascript" src="https://unpkg.com/@webcomponents/webcomponentsjs@2.8.0/webcomponents-bundle.js"></script>\n';
+  const webStream = '<script type="text/javascript" src="https://unpkg.com/web-streams-polyfill/dist/polyfill.es5.js"></script>\n';
+  const strScripts = loadPolyfills()+jsonparch+es5shims+es6shims+html5ShivScript+coreJsScript+normalizePoly+underscore+interObserver+resizeObserver+dialogPoly+customWeb+webStream;
   if ($('head').length > 0) {
     $('head').prepend(strScripts);
   } else {
