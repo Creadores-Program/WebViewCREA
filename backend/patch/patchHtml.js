@@ -69,6 +69,7 @@ export default async function patchHtml(html, headers) {
     }
     $importMapScript.remove();
   });
+  let contextCss = {};
   const stylePromises = [];
   $('style').each((_, elem) => {
     const $style = $(elem);
@@ -79,7 +80,7 @@ export default async function patchHtml(html, headers) {
       $style.attr('type', 'text/css');
       const cssContent = $style.html();
       if (cssContent && cssContent.trim()) {
-        const promise = patchCss(cssContent, baseUrl).then((patchedCss) => {
+        const promise = patchCss(cssContent, baseUrl, null, contextCss).then((patchedCss) => {
           $style.text(patchedCss);
         }).catch((err) =>{
           console.error(err);
@@ -96,7 +97,7 @@ export default async function patchHtml(html, headers) {
     if(new URL(urlP).hostname != baseHost){
       headersLoc = headersNoCookie;
     }
-    const promise = patchCss(null, urlP, headersLoc).then((patchedCss) => {
+    const promise = patchCss(null, urlP, headersLoc, contextCss).then((patchedCss) => {
       $link.replaceWith('<style type="text/css">/n'+patchedCss+"/n</style>");
     }).catch((err) =>{
       console.error(err);
@@ -108,7 +109,7 @@ export default async function patchHtml(html, headers) {
     const inlineCss = $elem.attr('style');
     if (inlineCss && inlineCss.trim()) {
       const wrappedCss = `* { ${inlineCss} }`;
-      const promise = patchCss(wrappedCss).then((patchedCss) => {
+      const promise = patchCss(wrappedCss, baseUrl, null, contextCss).then((patchedCss) => {
         const match = patchedCss.match(/\*[\s]*\{([\s\S]*)\}/);
         if (match && match[1]) {
           $elem.attr('style', match[1].trim());
