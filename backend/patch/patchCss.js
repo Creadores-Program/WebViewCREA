@@ -3,6 +3,7 @@ import postcssPresetEnv from 'postcss-preset-env';
 import postcssImport from 'postcss-import';
 import postcssUrl from 'postcss-url';
 import autoprefixer from 'autoprefixer';
+import postcssContextReference from '../postcsspls/postcssContextReference.js';
 import cssnano from 'cssnano';
 import userAgent from '../utils/UserAgent.js';
 
@@ -17,7 +18,7 @@ const singleColonPlugin = () => {
   };
 };
 
-export default async function patchCss(css, sourceUrl, headers){
+export default async function patchCss(css, sourceUrl, headers, context = {}){
   headers = { ...headers };
   delete headers["Connection"];
   delete headers["Keep-Alive"];
@@ -40,6 +41,7 @@ export default async function patchCss(css, sourceUrl, headers){
   }
   const plugins = [
     postcssImport(),
+    postcssNativeContext(context),
     postcssPresetEnv({
       stage: 0,
       browsers: [
