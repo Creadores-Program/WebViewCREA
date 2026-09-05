@@ -41,7 +41,7 @@ export default async function patchCss(css, sourceUrl, headers, context = {}){
   }
   const plugins = [
     postcssImport(),
-    postcssNativeContext(context),
+    postcssContextReference(context),
     postcssPresetEnv({
       stage: 0,
       browsers: [
