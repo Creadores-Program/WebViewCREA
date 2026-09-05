@@ -3,7 +3,7 @@ import postcssPresetEnv from 'postcss-preset-env';
 import postcssImport from 'postcss-import';
 import postcssUrl from 'postcss-url';
 import autoprefixer from 'autoprefixer';
-import postcssContextReference from '../postcsspls/postcssContextReference.js';
+import { postcssContextReference } from '../postcsspls/postcssContextReference.js';
 import cssnano from 'cssnano';
 import userAgent from '../utils/UserAgent.js';
 
