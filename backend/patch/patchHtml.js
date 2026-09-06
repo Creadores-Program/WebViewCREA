@@ -193,9 +193,17 @@ export default async function patchHtml(html, headers) {
   const interObserver = '<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/intersection-observer/intersection-observer.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>\n';
   const resizeObserver = '<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/resize-observer-polyfill/dist/ResizeObserver.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>\n';
   const dialogPoly = '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dialog-polyfill/0.5.6/dialog-polyfill.min.css">\n<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/dialog-polyfill/0.5.6/dialog-polyfill.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>\n';
+  const historyPoly = '<script src="https://cdn.jsdelivr.net/gh/browserstate/history.js@master/scripts/bundled/html4%2Bhtml5/native.history.js"></script>\n';
   const customWeb = '<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@webcomponents/webcomponentsjs/webcomponents-bundle.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>\n';
+  const headpoly = '<script>\ndocument.head = document.head || document.getElementsByTagName('head')[0];\n</script>\n';
   const dom4 = '<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/dom4/2.1.6/dom4.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>\n';
   const webStream = '<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/web-streams-polyfill/dist/polyfill.es5.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>\n';
+  const offlineEvent = '<script src="https://cdn.jsdelivr.net/gh/remy/polyfills@master/offline-events.min.js"></script>\n';
+  const webRtc = '<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/ShareIt-project/DataChannel-polyfill@master/dist/datachannel.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>\n<script>\nif(window.RTCPeerConnection == null){ window.RTCPeerConnection = window.RTCPeerConnection || window.webkitRTCPeerConnection || window.mozRTCPeerConnection; }\n</script>\n';
+  const webRtcuserData = '<script src="https://cdn.jsdelivr.net/gh/addyosmani/getUserMedia.js@gh-pages/dist/getUserMedia.noFallback.min.js"></script>';
+  const rafjs = '<script src="https://cdn.jsdelivr.net/gh/ngryman/raf.js@master/raf.min.js"></script>';
+  const beacon = '<script src="https://cdn.jsdelivr.net/npm/navigator.sendbeacon"></script>';
+  const manup = '<script src="https://cdn.jsdelivr.net/gh/boyofgreen/ManUp.js@master/manup.min.js"></script>';
   const strScripts = loadPolyfills()+jsonparch+es5shims+es6shims+html5ShivScript+coreJsScript+normalizePoly+underscore+interObserver+resizeObserver+dialogPoly+customWeb+dom4+webStream;
   if ($('head').length > 0) {
     $('head').prepend(strScripts);
