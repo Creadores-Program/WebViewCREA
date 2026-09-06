@@ -314,17 +314,32 @@ export default async function patchJs(jscode, mapImport = {}, config = {}) {
         warnings: false,
         comparisons: false,
         inline: 2,
-        keep_infinity: true
+        keep_infinity: true,
+        passes: 3,
+        unsafe: false,
+        dead_code: true,
+        drop_console: false,
+        drop_debugger: true,
+        evaluate: true,
+        loops: true,
+        reduce_vars: true,
+        reduce_funcs: true,
+        sequences: true,
+        booleans: true,
+        conditionals: true,
+        unused: true
       },
       mangle: {
-        ie8: true
+        ie8: true,
+        safari10: true
       },
       output: {
         ecma: 5,
         quote_keys: true,
         ascii_only: true,
         comments: false,
-        ie8: true
+        ie8: true,
+        wrap_iife: true
       }
     });
 
