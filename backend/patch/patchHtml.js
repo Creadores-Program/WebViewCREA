@@ -199,12 +199,13 @@ export default async function patchHtml(html, headers) {
   const dom4 = '<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/dom4/2.1.6/dom4.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>\n';
   const webStream = '<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/web-streams-polyfill/dist/polyfill.es5.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>\n';
   const offlineEvent = '<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/remy/polyfills@master/offline-events.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>\n';
-  const webRtc = '<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/ShareIt-project/DataChannel-polyfill@master/dist/datachannel.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>\n<script type="text/javascript">\nif(window.RTCPeerConnection == null){ window.RTCPeerConnection = window.RTCPeerConnection || window.webkitRTCPeerConnection || window.mozRTCPeerConnection; }\n</script>\n';
+  const websocketPoly = '<script type="text/javascript">\nif(!window.WebSocket){ window.WebSocket = window.WebSocket || window.MozWebSocket || window.WebKitWebSocket; }</script>\n';
+  const webRtc = '<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/ShareIt-project/DataChannel-polyfill@master/dist/datachannel.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>\n<script type="text/javascript">\nif(!window.RTCPeerConnection){ window.RTCPeerConnection = window.RTCPeerConnection || window.webkitRTCPeerConnection || window.mozRTCPeerConnection; }\n</script>\n';
   const webRtcuserData = '<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/addyosmani/getUserMedia.js@gh-pages/dist/getUserMedia.noFallback.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>';
   const rafjs = '<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/ngryman/raf.js@master/raf.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>';
   const beacon = '<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/navigator.sendbeacon" crossorigin="anonymous" referrerpolicy="no-referrer"></script>';
   const manup = '<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/boyofgreen/ManUp.js@master/manup.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>';
-  const strScripts = loadPolyfills()+jsonparch+es5shims+es6shims+headpoly+html5ShivScript+coreJsScript+normalizePoly+underscore+interObserver+resizeObserver+dialogPoly+customWeb+dom4+webStream+historyPoly+offlineEvent+webRtc+webRtcuserData+rafjs+beacon+manup;
+  const strScripts = loadPolyfills()+jsonparch+es5shims+es6shims+headpoly+html5ShivScript+coreJsScript+normalizePoly+underscore+interObserver+resizeObserver+dialogPoly+customWeb+dom4+webStream+historyPoly+offlineEvent+websocketPoly+webRtc+webRtcuserData+rafjs+beacon+manup;
   if ($('head').length > 0) {
     $('head').prepend(strScripts);
   } else {
