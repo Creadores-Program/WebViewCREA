@@ -1,5 +1,6 @@
 import babel from '@babel/core';
 import presetEnv from '@babel/preset-env';
+import pluginTransformBigintToJsbi from 'babel-plugin-transform-bigint-to-jsbi';
 import { minify } from 'terser';
 
 function legacyDomApiPlugin({ types: t }) {
@@ -296,7 +297,8 @@ export default async function patchJs(jscode, mapImport = {}, config = {}) {
     ],
     plugins: [
       legacyDomApiPlugin,
-      [es5SyncRemoteProxyPlugin, { mapImport, scriptUrl }]
+      [es5SyncRemoteProxyPlugin, { mapImport, scriptUrl }],
+      pluginTransformBigintToJsbi
     ],
     configFile: false,
     babelrc: false
