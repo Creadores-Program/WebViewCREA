@@ -3,7 +3,6 @@ import patchCss from './patchCss.js';
 import patchJs from './patchJs.js';
 import userAgent from '../utils/UserAgent.js';
 import { minify } from 'html-minifier-terser';
-import urlPolyfill from '../polyfills/url-polyfill.js';
 import runtime from '../polyfills/runtime.js';
 import fetchPoly from '../polyfills/fetch.js';
 import uriPoly from '../polyfills/uriPoly.js';
@@ -11,7 +10,6 @@ import uriPoly from '../polyfills/uriPoly.js';
 const POLYFILLS = [
   uriPoly,
   runtime,
-  urlPolyfill,
   fetchPoly
 ].join("\n\n");
 
@@ -183,6 +181,7 @@ export default async function patchHtml(html, headers) {
       }
     }
   });
+  const urlPoly = '<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/url-polyfill/url-polyfill.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>\n';
   const jsonparch = '<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/json3/lib/json3.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>\n';
   const underscore = '<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.13.8/underscore-min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>\n'
   const html5ShivScript = '<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>\n';
@@ -205,7 +204,7 @@ export default async function patchHtml(html, headers) {
   const rafjs = '<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/ngryman/raf.js@master/raf.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>';
   const beacon = '<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/navigator.sendbeacon" crossorigin="anonymous" referrerpolicy="no-referrer"></script>';
   const manup = '<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/boyofgreen/ManUp.js@master/manup.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>';
-  const strScripts = loadPolyfills()+jsonparch+es5shims+es6shims+headpoly+html5ShivScript+coreJsScript+normalizePoly+underscore+interObserver+resizeObserver+dialogPoly+customWeb+dom4+webStream+historyPoly+offlineEvent+websocketPoly+webRtc+webRtcuserData+rafjs+beacon+manup;
+  const strScripts = loadPolyfills()+urlPoly+jsonparch+es5shims+es6shims+headpoly+html5ShivScript+coreJsScript+normalizePoly+underscore+interObserver+resizeObserver+dialogPoly+customWeb+dom4+webStream+historyPoly+offlineEvent+websocketPoly+webRtc+webRtcuserData+rafjs+beacon+manup;
   if ($('head').length > 0) {
     $('head').prepend(strScripts);
   } else {
