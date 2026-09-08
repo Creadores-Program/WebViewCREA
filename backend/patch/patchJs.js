@@ -309,6 +309,9 @@ export default async function patchJs(jscode, mapImport = {}, config = {}) {
       ecma: 3,
       ie8: true,
       safari10: true,
+      parse: {
+        ecma: 3,
+      },
       compress: {
         ecma: 3,
         warnings: false,
