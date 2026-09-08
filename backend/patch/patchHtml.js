@@ -4,13 +4,11 @@ import patchJs from './patchJs.js';
 import userAgent from '../utils/UserAgent.js';
 import { minify } from 'html-minifier-terser';
 import runtime from '../polyfills/runtime.js';
-import fetchPoly from '../polyfills/fetch.js';
 import uriPoly from '../polyfills/uriPoly.js';
 
 const POLYFILLS = [
   uriPoly,
-  runtime,
-  fetchPoly
+  runtime
 ].join("\n\n");
 
 function loadPolyfills(){
@@ -188,6 +186,7 @@ export default async function patchHtml(html, headers) {
   const coreJsScript = '<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/core-js/3.50.0/minified.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>\n';
   const es5shims = '<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/es5-shim/4.6.7/es5-shim.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/es5-shim/4.6.7/es5-sham.min.js"  crossorigin="anonymous" referrerpolicy="no-referrer"></script>\n';
   const es6shims = '<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/es6-shim/0.35.8/es6-sham.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/es6-shim/0.35.8/es6-shim.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>\n';
+  const fetchPoly = '<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/whatwg-fetch/fetch.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>';
   const normalizePoly = '<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/unorm/lib/unorm.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>\n';
   const interObserver = '<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/intersection-observer/intersection-observer.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>\n';
   const resizeObserver = '<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/resize-observer-polyfill/dist/ResizeObserver.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>\n';
@@ -204,7 +203,7 @@ export default async function patchHtml(html, headers) {
   const rafjs = '<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/ngryman/raf.js@master/raf.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>';
   const beacon = '<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/navigator.sendbeacon" crossorigin="anonymous" referrerpolicy="no-referrer"></script>';
   const manup = '<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/boyofgreen/ManUp.js@master/manup.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>';
-  const strScripts = loadPolyfills()+urlPoly+jsonparch+es5shims+es6shims+headpoly+html5ShivScript+coreJsScript+normalizePoly+underscore+interObserver+resizeObserver+dialogPoly+customWeb+dom4+webStream+historyPoly+offlineEvent+websocketPoly+webRtc+webRtcuserData+rafjs+beacon+manup;
+  const strScripts = loadPolyfills()+urlPoly+jsonparch+es5shims+es6shims+fetchPoly+headpoly+html5ShivScript+coreJsScript+normalizePoly+underscore+interObserver+resizeObserver+dialogPoly+customWeb+dom4+webStream+historyPoly+offlineEvent+websocketPoly+webRtc+webRtcuserData+rafjs+beacon+manup;
   if ($('head').length > 0) {
     $('head').prepend(strScripts);
   } else {
