@@ -306,11 +306,11 @@ export default async function patchJs(jscode, mapImport = {}, config = {}) {
 
   try {
     const minified = await minify(code, {
-      ecma: 5,
+      ecma: 3,
       ie8: true,
       safari10: true,
       compress: {
-        ecma: 5,
+        ecma: 3,
         warnings: false,
         comparisons: false,
         inline: 2,
@@ -334,7 +334,7 @@ export default async function patchJs(jscode, mapImport = {}, config = {}) {
         safari10: true
       },
       output: {
-        ecma: 5,
+        ecma: 3,
         quote_keys: true,
         ascii_only: true,
         comments: false,
