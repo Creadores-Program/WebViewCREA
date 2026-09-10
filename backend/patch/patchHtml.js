@@ -43,9 +43,15 @@ export default async function patchHtml(html, headers) {
   let headersNoCookie = { ...headers };
   delete headersNoCookie["cookie"];
   delete headersNoCookie["Cookie"];
-  const $ = cheerio.load(html, { decodeEntities: false });
-  const baseUrl = $('webviewcrea')?.attr('baseurl');
+  const matchBurl = html.match(/<webviewcrea[^>]*\bbaseurl=["']([^"']+)["']/i);
+  const baseUrl = matchBurl ? matchButl[1] : "https://localhost:8080/";
   const baseHost = new URL(baseUrl).hostname;
+  const $ = cheerio.load(html, {
+    baseURI: baseUrl,
+    decodeEntities: false,
+    recognizeSelfClosing: true
+  });
+  $('webviewcrea').remove();
   const EVENT_ATTR_REGEX = /^on[a-z]+$/i;
   let globalImportMap = { imports: {} };
   $('script[type="importmap"]').each((_, elem) => {
@@ -85,7 +91,7 @@ export default async function patchHtml(html, headers) {
   });
   $('link[rel="stylesheet"]').each((_, elem) => {
     const $link = $(elem);
-    const url = $link.attr('href') || $link.attr('src');
+    const url = $link.prop('href') || $link.prop('src');
     const urlP = resolveUrl(url, baseUrl);
     let headersLoc = headers;
     if(new URL(urlP).hostname != baseHost){
@@ -129,7 +135,7 @@ export default async function patchHtml(html, headers) {
       }
       $script.attr('type', 'text/javascript');
 
-      const src = $script.attr('src');
+      const src = $script.prop('src');
       const jsContent = $script.html();
       if (src) {
         let srcP = resolveUrl(src, baseUrl);
@@ -171,11 +177,11 @@ export default async function patchHtml(html, headers) {
   });
   $('img[srcset]').each((_, elem) => {
     const $img = $(elem);
-    const srcset = $img.attr('srcset');
+    const srcset = $img.prop('srcset');
     if (srcset) {
       const firstUrl = srcset.split(',')[0].trim().split(' ')[0];
-      if (!$img.attr('src')) {
-        $img.attr('src', firstUrl);
+      if (!$img.prop('src')) {
+        $img.prop('src', firstUrl);
       }
     }
   });
