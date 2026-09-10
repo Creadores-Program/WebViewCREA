@@ -208,6 +208,190 @@ function es5SyncRemoteProxyPlugin({ types: t }, options) {
 
   return {
     visitor: {
+      Program: {
+        enter(path) {
+          let hasExport = false;
+          path.traverse({
+            ExportDeclaration(exportPath) {
+              hasExport = true;
+              exportPath.stop();
+            }
+          });
+
+          if (hasExport) {
+            const initExports = t.variableDeclaration('var', [
+              t.variableDeclarator(
+                t.identifier('exports'),
+                t.conditionalExpression(
+                  t.binaryExpression(
+                    '!==',
+                    t.unaryExpression('typeof', t.identifier('exports')),
+                    t.stringLiteral('undefined')
+                  ),
+                  t.identifier('exports'),
+                  t.conditionalExpression(
+                    t.binaryExpression(
+                      '!==',
+                      t.unaryExpression('typeof', t.identifier('window')),
+                      t.stringLiteral('undefined')
+                    ),
+                    t.identifier('window'),
+                    t.thisExpression()
+                  )
+                )
+              )
+            ]);
+            path.unshiftContainer('body', initExports);
+          }
+        }
+      },
+
+      ExportDefaultDeclaration(path) {
+        const decl = path.node.declaration;
+        const nodes = [];
+
+        if (t.isFunctionDeclaration(decl) || t.isClassDeclaration(decl)) {
+          if (decl.id) {
+            nodes.push(decl);
+            nodes.push(
+              t.expressionStatement(
+                t.assignmentExpression(
+                  '=',
+                  t.memberExpression(t.identifier('exports'), t.stringLiteral('default'), true),
+                  decl.id
+                )
+              )
+            );
+          } else {
+            const fnExpr = t.isFunctionDeclaration(decl)
+              ? t.functionExpression(null, decl.params, decl.body, decl.generator, decl.async)
+              : decl;
+            nodes.push(
+              t.expressionStatement(
+                t.assignmentExpression(
+                  '=',
+                  t.memberExpression(t.identifier('exports'), t.stringLiteral('default'), true),
+                  fnExpr
+                )
+              )
+            );
+          }
+        } else {
+          nodes.push(
+            t.expressionStatement(
+              t.assignmentExpression(
+                '=',
+                t.memberExpression(t.identifier('exports'), t.stringLiteral('default'), true),
+                decl
+              )
+            )
+          );
+        }
+
+        path.replaceWithMultiple(nodes);
+      },
+
+      ExportNamedDeclaration(path) {
+        const { declaration, specifiers, source } = path.node;
+
+        if (source) {
+          const importSpecifiers = [];
+          const exportSpecifiers = [];
+
+          specifiers.forEach(spec => {
+            if (t.isExportSpecifier(spec)) {
+              const localId = path.scope.generateUidIdentifier(spec.local.name || 'reexport');
+              importSpecifiers.push(t.importSpecifier(localId, spec.local));
+              exportSpecifiers.push(t.exportSpecifier(localId, spec.exported));
+            }
+          });
+
+          const newImport = t.importDeclaration(importSpecifiers, source);
+          const newExport = t.exportNamedDeclaration(null, exportSpecifiers);
+
+          path.replaceWithMultiple([newImport, newExport]);
+          return;
+        }
+
+        const nodes = [];
+
+        if (declaration) {
+          nodes.push(declaration);
+          const bindings = path.get('declaration').getBindingIdentifiers();
+          Object.keys(bindings).forEach(name => {
+            const isSafeIdent = /^[a-zA-Z_$][a-zA-Z0-9_$]*$/.test(name) && name !== 'default';
+            nodes.push(
+              t.expressionStatement(
+                t.assignmentExpression(
+                  '=',
+                  t.memberExpression(
+                    t.identifier('exports'),
+                    isSafeIdent ? t.identifier(name) : t.stringLiteral(name),
+                    !isSafeIdent
+                  ),
+                  t.identifier(name)
+                )
+              )
+            );
+          });
+        } else if (specifiers && specifiers.length > 0) {
+          specifiers.forEach(spec => {
+            if (t.isExportSpecifier(spec)) {
+              const local = spec.local;
+              const exported = spec.exported;
+              const exportedName = t.isIdentifier(exported) ? exported.name : exported.value;
+              const isSafeIdent = /^[a-zA-Z_$][a-zA-Z0-9_$]*$/.test(exportedName) && exportedName !== 'default';
+
+              nodes.push(
+                t.expressionStatement(
+                  t.assignmentExpression(
+                    '=',
+                    t.memberExpression(
+                      t.identifier('exports'),
+                      isSafeIdent ? t.identifier(exportedName) : t.stringLiteral(exportedName),
+                      !isSafeIdent
+                    ),
+                    local
+                  )
+                )
+              );
+            }
+          });
+        }
+
+        if (nodes.length > 0) {
+          path.replaceWithMultiple(nodes);
+        } else {
+          path.remove();
+        }
+      },
+
+      ExportAllDeclaration(path) {
+        const source = path.node.source;
+        const tempId = path.scope.generateUidIdentifier('exportAll');
+        const newImport = t.importDeclaration([t.importNamespaceSpecifier(tempId)], source);
+
+        const keyId = t.identifier('_k');
+        const copyLoop = t.forInStatement(
+          t.variableDeclaration('var', [t.variableDeclarator(keyId)]),
+          tempId,
+          t.blockStatement([
+            t.ifStatement(
+              t.binaryExpression('!==', keyId, t.stringLiteral('default')),
+              t.expressionStatement(
+                t.assignmentExpression(
+                  '=',
+                  t.memberExpression(t.identifier('exports'), keyId, true),
+                  t.memberExpression(tempId, keyId, true)
+                )
+              )
+            )
+          ])
+        );
+
+        path.replaceWithMultiple([newImport, copyLoop]);
+      },
+
       ImportDeclaration(path) {
         const targetUrl = getTargetUrl(path.node.source.value);
         const specifiers = path.node.specifiers;
@@ -243,10 +427,10 @@ function es5SyncRemoteProxyPlugin({ types: t }, options) {
 
         specifiers.forEach(spec => {
           if (t.isImportDefaultSpecifier(spec)) {
-            polyfillCode += `var ${spec.local.name} = module.exports.default || module.exports;`;
+            polyfillCode += `var ${spec.local.name} = module.exports['default'] || module.exports;`;
           } else if (t.isImportSpecifier(spec)) {
             const importedName = spec.imported.name;
-            polyfillCode += `var ${spec.local.name} = module.exports.${importedName};`;
+            polyfillCode += `var ${spec.local.name} = module.exports['${importedName}'];`;
           } else if (t.isImportNamespaceSpecifier(spec)) {
             polyfillCode += `var ${spec.local.name} = module.exports;`;
           }
