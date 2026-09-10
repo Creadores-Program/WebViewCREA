@@ -51,7 +51,7 @@ export default async function patchHtml(html, headers) {
     decodeEntities: false,
     recognizeSelfClosing: true
   });
-  $('webviewcrea').remove();
+  $('webviewcrea').contents().unwrap();
   const EVENT_ATTR_REGEX = /^on[a-z]+$/i;
   let globalImportMap = { imports: {} };
   $('script[type="importmap"]').each((_, elem) => {
