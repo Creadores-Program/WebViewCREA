@@ -128,7 +128,6 @@ public class WebViewCreaClient extends WebViewClient{
         view.post(new Runnable(){
             @Override
             public void run(){
-                onProgressChanged(view, 100);
                 view.loadUrl(url);
             }
         });
