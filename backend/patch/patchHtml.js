@@ -44,7 +44,7 @@ export default async function patchHtml(html, headers) {
   delete headersNoCookie["cookie"];
   delete headersNoCookie["Cookie"];
   const matchBurl = html.match(/<webviewcrea[^>]*\bbaseurl=["']([^"']+)["']/i);
-  const baseUrl = matchBurl ? matchButl[1] : "https://localhost:8080/";
+  const baseUrl = matchBurl ? matchBurl[1] : "https://localhost:8080/";
   const baseHost = new URL(baseUrl).hostname;
   const $ = cheerio.load(html, {
     baseURI: baseUrl,
