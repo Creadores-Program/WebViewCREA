@@ -39,6 +39,7 @@ public class WebViewCreaClient extends WebViewClient{
         if(!uniShouldOverrideUrlLoading(view, request.getUrl().toString())){
             return super.shouldOverrideUrlLoading(view, request);
         }
+        return true;
     }
     @SuppressWarnings("deprecation")
     @Override
@@ -46,6 +47,7 @@ public class WebViewCreaClient extends WebViewClient{
         if(!uniShouldOverrideUrlLoading(view, url)){
             return super.shouldOverrideUrlLoading(view, url);
         }
+        return true;
     }
 
     private boolean uniShouldOverrideUrlLoading(final WebView view, final String url){
