@@ -198,7 +198,7 @@ export default async function patchHtml(html, headers) {
   const websocketPoly = '<script type="text/javascript">\nif(!window.WebSocket){ window.WebSocket = window.WebSocket || window.MozWebSocket || window.WebKitWebSocket; }</script>\n';
   const webRtc = '<script type="text/javascript" src="https://cdn.jsdelivr.net/combine/gh/ShareIt-project/DataChannel-polyfill@master/dist/datachannel.min.js,gh/addyosmani/getUserMedia.js@gh-pages/dist/getUserMedia.noFallback.min.js,gh/ngryman/raf.js@master/raf.min.js,npm/navigator.sendbeacon,gh/boyofgreen/ManUp.js@master/manup.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>\n<script type="text/javascript">\nif(!window.RTCPeerConnection){ window.RTCPeerConnection = window.RTCPeerConnection || window.webkitRTCPeerConnection || window.mozRTCPeerConnection; }\n</script>\n';
   const globalPoly = '<script type="text/javascript">\nwindow.globalThis = window.globalThis || window; window.queueMicrotask = window.queueMicrotask || function(fn) { Promise.resolve().then(fn)["catch"](function(err) { setTimeout(fn, 0); }); }; window.requestIdleCallback = window.requestIdleCallback || function(cb) { var start = Date.now(); return setTimeout(function() { cb({ didTimeout: false, timeRemaining: function() { return Math.max(0, 50 - (Date.now() - start)); } }); }, 1); };\n</script>\n';
-  const strScripts = loadPolyfills()+headpoly+es5shims+es6shims+coreJsScript/*+intlPoly*/+globalPoly+urlPoly+underscore+html5ShivScript+dom4+dialogPoly+websocketPoly+webRtc;
+  const strScripts = loadPolyfills()+headpoly+es5shims+es6shims+coreJsScript+intlPoly+globalPoly+urlPoly+underscore+html5ShivScript+dom4+dialogPoly+websocketPoly+webRtc;
   if ($('head').length > 0) {
     $('head').prepend(strScripts);
   } else {
