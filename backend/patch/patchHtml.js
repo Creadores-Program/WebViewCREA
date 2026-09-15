@@ -54,7 +54,7 @@ export default async function patchHtml(html, headers) {
   $('webviewcrea').contents().unwrap();
   const EVENT_ATTR_REGEX = /^on[a-z]+$/i;
   let globalImportMap = { imports: {} };
-  $('script[type="importmap"]').each((_, elem) => {
+  $('script[type="importmap" i]').each((_, elem) => {
     const $importMapScript = $(elem);
     try {
       const content = $importMapScript.html();
@@ -69,7 +69,7 @@ export default async function patchHtml(html, headers) {
     }
     $importMapScript.remove();
   });
-  $('meta[http-equiv="refresh"]').each((_, elem) => {
+  $('meta[http-equiv="refresh" i]').each((_, elem) => {
     const content = $(elem).attr('content');
     if (!content) return;
     const match = content.match(/(\d+)\s*;\s*url=\s*['"]?([^'"]+)['"]?/i);
@@ -81,6 +81,13 @@ export default async function patchHtml(html, headers) {
          : `<script>window.location.href = "${targetUrl}";</script>`;
       $(elem).replaceWith(scriptTag);
     }
+  });
+  $('meta[http-equiv="content-security-policy" i]').each((_, elem) => {
+    let csp = $(elem).prop('content') || '';
+    csp = csp
+      .replace(/script-src\s+/gi, "script-src 'unsafe-inline' ")
+      .replace(/(worker-src|form-action|base-uri|script-src-attr|child-src)[^;]*;?/gi, '');
+    $(elem).attr('content', csp);
   });
   let contextCss = {};
   const stylePromises = [];
@@ -102,7 +109,7 @@ export default async function patchHtml(html, headers) {
       }
     }
   });
-  $('link[rel="stylesheet"]').each((_, elem) => {
+  $('link[rel="stylesheet" i]').each((_, elem) => {
     const $link = $(elem);
     const url = $link.prop('href') || $link.prop('src');
     const urlP = resolveUrl(url, baseUrl);
