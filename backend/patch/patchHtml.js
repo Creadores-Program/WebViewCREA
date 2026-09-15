@@ -69,6 +69,19 @@ export default async function patchHtml(html, headers) {
     }
     $importMapScript.remove();
   });
+  $('meta[http-equiv="refresh"]').each((_, elem) => {
+    const content = $(elem).attr('content');
+    if (!content) return;
+    const match = content.match(/(\d+)\s*;\s*url=\s*['"]?([^'"]+)['"]?/i);
+    if (match) {
+      const delaySeconds = parseInt(match[1], 10);
+      const targetUrl = match[2];
+      const scriptTag = delaySeconds > 0
+         ? `<script>setTimeout(function() { window.location.href = "${targetUrl}"; }, ${delaySeconds * 1000});</script>`
+         : `<script>window.location.href = "${targetUrl}";</script>`;
+      $(elem).replaceWith(scriptTag);
+    }
+  });
   let contextCss = {};
   const stylePromises = [];
   $('style').each((_, elem) => {
