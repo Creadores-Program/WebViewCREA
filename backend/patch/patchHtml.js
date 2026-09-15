@@ -85,7 +85,8 @@ export default async function patchHtml(html, headers) {
   $('meta[http-equiv="content-security-policy" i]').each((_, elem) => {
     let csp = $(elem).prop('content') || '';
     csp = csp
-      .replace(/script-src\s+/gi, "script-src 'unsafe-inline' ")
+      .replace(/'nonce-[^']+'/gi, '')
+      .replace(/script-src\s+/gi, "script-src 'self' * 'unsafe-inline' 'unsafe-eval' ")
       .replace(/(worker-src|form-action|base-uri|script-src-attr|child-src)[^;]*;?/gi, '');
     $(elem).attr('content', csp);
   });
