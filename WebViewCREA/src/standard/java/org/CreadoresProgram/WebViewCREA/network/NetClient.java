@@ -60,7 +60,7 @@ public class NetClient{
   private static final String lang = Locale.getDefault().getLanguage();
   private MediaType mediaType = MediaType.parse("text/plain; charset=utf-8");
 
-  public NetRes post(String url, String userAgent, boolean isDesktop, String data, String cookie) throws IOException{
+  public NetRes post(String url, String userAgent, boolean isDesktop, String data, String cookie, boolean isDarkTheme) throws IOException{
     RequestBody body = RequestBody.create(mediaType, data);
     Request req = new Request.Builder()
       .url(url)
@@ -78,12 +78,13 @@ public class NetClient{
       .header("Sec-Fetch-Site", "cross-site")
       .header("Sec-Fetch-User", "?1")
       .header("Cookie", (cookie != null) ? cookie : "")
+      .header("Sec-CH-Prefers-Color-Scheme", (isDarkTheme ? "dark" : "light"))
       .build();
     Response res = clientHt.newCall(req).execute();
     return new NetRes(res);
   }
 
-  public NetRes get(String url, String userAgent, boolean isDesktop, String cookie) throws IOException{
+  public NetRes get(String url, String userAgent, boolean isDesktop, String cookie, boolean isDarkTheme) throws IOException{
     Request req = new Request.Builder()
       .url(url)
       .header("Accept-Language", lang)
@@ -98,6 +99,7 @@ public class NetClient{
       .header("Sec-Fetch-Mode", "navigate")
       .header("Sec-Fetch-Site", "cross-site")
       .header("Sec-Fetch-User", "?1")
+      .header("Sec-CH-Prefers-Color-Scheme", (isDarkTheme ? "dark" : "light"))
       .build();
     Response res = clientHt.newCall(req).execute();
     return new NetRes(res);
