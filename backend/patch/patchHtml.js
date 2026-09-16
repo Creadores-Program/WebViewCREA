@@ -5,10 +5,12 @@ import userAgent from '../utils/UserAgent.js';
 import { minify } from 'html-minifier-terser';
 import runtime from '../polyfills/runtime.js';
 import uriPoly from '../polyfills/uriPoly.js';
+import polyDark from '../polyfills/darkPoly.js';
 
 const POLYFILLS = [
   uriPoly,
-  runtime
+  runtime,
+  polyDark
 ].join("\n\n");
 
 function loadPolyfills(){
@@ -46,6 +48,7 @@ export default async function patchHtml(html, headers) {
   const matchBurl = html.match(/<webviewcrea[^>]*\bbaseurl=["']([^"']+)["']/i);
   const baseUrl = matchBurl ? matchBurl[1] : "https://localhost:8080/";
   const baseHost = new URL(baseUrl).hostname;
+  const isDarkTheme = (headers["sec-ch-prefers-color-scheme"] != null && headers["sec-ch-prefers-color-scheme"] == "dark");
   const $ = cheerio.load(html, {
     baseURI: baseUrl,
     decodeEntities: false,
@@ -215,11 +218,12 @@ export default async function patchHtml(html, headers) {
   const dialogPoly = '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dialog-polyfill/0.5.6/dialog-polyfill.min.css">\n<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/dialog-polyfill/0.5.6/dialog-polyfill.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>\n';
   const intlPoly = '<script type="text/javascript" src="https://cdn.jsdelivr.net/combine/npm/intl@1.2.5/dist/Intl.min.js,npm/intl@1.2.5/locale-data/jsonp/es.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>\n';
   const headpoly = '<script type="text/javascript">\ndocument.head = document.head || document.getElementsByTagName("head")[0];\n</script>\n';
+  const matchMediaPoly = '<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/paulirish/matchMedia.js/matchMedia.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>\n';
   const dom4 = '<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/dom4/2.1.6/dom4.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>\n';
   const websocketPoly = '<script type="text/javascript">\nif(!window.WebSocket){ window.WebSocket = window.WebSocket || window.MozWebSocket || window.WebKitWebSocket; }</script>\n';
   const webRtc = '<script type="text/javascript" src="https://cdn.jsdelivr.net/combine/gh/ShareIt-project/DataChannel-polyfill@master/dist/datachannel.min.js,gh/addyosmani/getUserMedia.js@gh-pages/dist/getUserMedia.noFallback.min.js,gh/ngryman/raf.js@master/raf.min.js,npm/navigator.sendbeacon,gh/boyofgreen/ManUp.js@master/manup.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>\n<script type="text/javascript">\nif(!window.RTCPeerConnection){ window.RTCPeerConnection = window.RTCPeerConnection || window.webkitRTCPeerConnection || window.mozRTCPeerConnection; }\n</script>\n';
   const globalPoly = '<script type="text/javascript">\nwindow.globalThis = window.globalThis || window; window.queueMicrotask = window.queueMicrotask || function(fn) { Promise.resolve().then(fn)["catch"](function(err) { setTimeout(fn, 0); }); }; window.requestIdleCallback = window.requestIdleCallback || function(cb) { var start = Date.now(); return setTimeout(function() { cb({ didTimeout: false, timeRemaining: function() { return Math.max(0, 50 - (Date.now() - start)); } }); }, 1); };\n</script>\n';
-  const strScripts = loadPolyfills()+headpoly+es5shims+es6shims+coreJsScript+intlPoly+globalPoly+urlPoly+underscore+html5ShivScript+dom4+dialogPoly+websocketPoly+webRtc;
+  const strScripts = loadPolyfills()+headpoly+matchMediaPoly+(function(){ if(isDarkTheme){ return polyDark; } return ""; })()+es5shims+es6shims+coreJsScript+intlPoly+globalPoly+urlPoly+underscore+html5ShivScript+dom4+dialogPoly+websocketPoly+webRtc;
   if ($('head').length > 0) {
     $('head').prepend(strScripts);
   } else {
