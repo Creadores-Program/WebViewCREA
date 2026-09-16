@@ -1,4 +1,4 @@
-(function() {
+export default `(function() {
     const originalMatchMedia = window.matchMedia;
     window.matchMedia = function(query) {
         if (query.includes('prefers-color-scheme')) {
@@ -15,4 +15,4 @@
         }
         return originalMatchMedia(query);
     };
-})();
+})();`;
