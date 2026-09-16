@@ -20,6 +20,7 @@ public class WebViewCreaClient extends WebViewClient{
     private final NetClient client = new NetClient();
     private final ExecutorService background = Executors.newCachedThreadPool();
     private boolean desktop = false;
+    private boolean darkTheme = false;
     private static final String[] urlsPassed = { "http", "https", "javascript" };
     private static final String PROXY_DEF_URL = "https://webviewcrea.vercel.app/";
     private static final String PROXY_GET_USERAGENT = PROXY_DEF_URL+"api/userAgent";
@@ -83,7 +84,7 @@ public class WebViewCreaClient extends WebViewClient{
             @Override public void run() {
                 NetRes res = null;
                 try{
-                    res = client.get(url, userAgent, desktop, cookie[0]);
+                    res = client.get(url, userAgent, desktop, cookie[0], darkTheme);
                     Map<String, String> headers = res.getHeaders();
                     if(!headers.containsKey("content-type")){
                         loadUrlNative(view, url);
@@ -157,11 +158,19 @@ public class WebViewCreaClient extends WebViewClient{
         this.desktop = desktop;
     }
 
+    public void setDarkTheme(boolean darkTheme){
+        this.darkTheme = darkTheme;
+    }
+
+    public boolean isDarkTheme(){
+        return this.darkTheme;
+    }
+
     private void patchHtml(WebView view, String data, String url, String userAgent, String cookie){
         data = insertTagWebView(data, url);
         NetRes res = null;
         try{
-            res = client.post(PROXY_PATCH_HTML, userAgent, desktop, data, cookie);
+            res = client.post(PROXY_PATCH_HTML, userAgent, desktop, data, cookie, darkTheme);
             data = res.getData();
         }catch(Exception e){
             e.printStackTrace();
@@ -183,7 +192,7 @@ public class WebViewCreaClient extends WebViewClient{
     private void patchJs(WebView view, String data, String url, boolean execute, boolean kitkatExecute, String userAgent, String cookie){
         NetRes res = null;
         try{
-            res = client.post(PROXY_PATCH_JS, userAgent, desktop, data, cookie);
+            res = client.post(PROXY_PATCH_JS, userAgent, desktop, data, cookie, darkTheme);
             data = res.getData();
         }catch(Exception e){
             e.printStackTrace();
@@ -213,7 +222,7 @@ public class WebViewCreaClient extends WebViewClient{
     private void patchCss(WebView view, String data, String url, String userAgent, String cookie){
         NetRes res = null;
         try{
-            res = client.post(PROXY_PATCH_CSS, userAgent, desktop, data, cookie);
+            res = client.post(PROXY_PATCH_CSS, userAgent, desktop, data, cookie, darkTheme);
             data = res.getData();
         }catch(Exception e){
             e.printStackTrace();
@@ -233,7 +242,7 @@ public class WebViewCreaClient extends WebViewClient{
                 NetRes res = null;
                 try{
                     String userStr = userAgentId.toString();
-                    res = client.post(PROXY_GET_USERAGENT, "", desktop, userStr, null);
+                    res = client.post(PROXY_GET_USERAGENT, "", desktop, userStr, null, darkTheme);
                     result[0] = res.getData();
                 }catch(Exception e){
                     result[0] = view.getSettings().getUserAgentString();
