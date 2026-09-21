@@ -23,7 +23,8 @@ export default async function patchCss(css, sourceUrl, headers, context = {}){
   delete headers["Connection"];
   delete headers["Keep-Alive"];
   delete headers["connection"];
-  delete headers["keep-alive"]
+  delete headers["keep-alive"];
+  const isDarkTheme = (headers["sec-ch-prefers-color-scheme"] != null && headers["sec-ch-prefers-color-scheme"] == "dark");
   if(sourceUrl && !css){
     const baseHost = new URL(sourceUrl).hostname;
     let request = await fetch(sourceUrl, {
@@ -71,6 +72,9 @@ export default async function patchCss(css, sourceUrl, headers, context = {}){
       url: 'absolute',
       baseUrl: sourceUrl
     }));
+  }
+  if(isDarkTheme){
+    plugins.push();
   }
   plugins.push(cssnano({
     preset: ['default', {
