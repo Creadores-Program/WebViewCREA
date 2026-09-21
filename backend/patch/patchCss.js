@@ -4,6 +4,7 @@ import postcssImport from 'postcss-import';
 import postcssUrl from 'postcss-url';
 import autoprefixer from 'autoprefixer';
 import { postcssContextReference } from '../postcsspls/postcssContextReference.js';
+import { postcssAlwaysDark } from '../postcsspls/postcssAlwaysDark.js';
 import cssnano from 'cssnano';
 import userAgent from '../utils/UserAgent.js';
 
@@ -74,7 +75,7 @@ export default async function patchCss(css, sourceUrl, headers, context = {}){
     }));
   }
   if(isDarkTheme){
-    plugins.push();
+    plugins.push(postcssAlwaysDark());
   }
   plugins.push(cssnano({
     preset: ['default', {
