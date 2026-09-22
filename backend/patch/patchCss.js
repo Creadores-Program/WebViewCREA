@@ -56,14 +56,30 @@ export default async function patchCss(css, sourceUrl, headers, context = {}){
       ],
       autoprefixer: {
         grid: 'autoplace',
+        flexbox: 'no-2009',
         cascade: false
       },
       features: {
         'custom-properties': { preserve: false },
+        'logical-properties-and-values': true,
+        'is-pseudo-class': true,
+        'not-pseudo-class': true,
         'nesting-rules': true,
         'hexadecimal-alpha-notation': true,
         'color-functional-notation': true,
-        'gap-properties': true
+        'lab-function': true,
+        'oklab-function': true,
+        'color-mix-function': true,
+        'gap-properties': true,
+        'custom-media-queries': true,
+        'custom-selectors': true,
+        'media-query-ranges': true,
+        'environment-variables': true,
+        'overflow-wrap-property': true,
+        'clamp': true,
+        'blank-pseudo-class': true,
+        'dir-pseudo-class': true,
+        'double-position-gradients': true
       }
     }),
     singleColonPlugin()
